@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Shop</title>
+  <style>
+    /* ====== Global (matches your other pages) ====== */
+    html, body {
+      margin:0; padding:0; height:100%;
+      font-family: Arial, sans-serif;
+      color:white;
+      background: black url('background.png') no-repeat center center fixed;
+      background-size: cover;
+    }
+    .overlay {
+      background-color: rgba(0,0,0,0.6);
+      position: fixed; inset: 0; z-index: -1;
+    }
+    .logo {
+      display:block; margin:10px auto 0; max-width:800px;
+    }
+    .content {
+      max-width:1100px; margin:auto; padding:20px;
+    }
+
+    /* ====== Sidebar (same as other pages) ====== */
+    .openbtn {
+      font-size:20px; cursor:pointer;
+      background:#111; color:white; border:none;
+      padding:10px 15px; margin:10px;
+    }
+    .sidebar {
+      height:100vh; width:0; position:fixed; top:0; left:0;
+      background-color:#111; overflow-y:auto; transition: width 0.3s;
+      padding-top:60px; z-index:100; border-right:1px solid #333;
+    }
+    .sidebar a { display:block; padding:10px 20px; text-decoration:none; color:white; }
+    .sidebar a:hover { background:#333; }
+    .sidebar .closebtn { position:absolute; top:10px; right:20px; font-size:25px; cursor:pointer; }
+
+    /* ====== Buttons & Controls (no rounded edges) ====== */
+    button, .btn {
+      background:#111; color:white; border:1px solid white;
+      padding:8px 14px; cursor:pointer; border-radius:0;
+    }
+    button:hover, .btn:hover { background:#333; }
+    button:disabled { opacity:0.55; cursor:not-allowed; }
+
+    /* ====== Top bar: cash + limit + category strip ====== */
+    .topbar {
+      display:flex; gap:10px; align-items:center; justify-content:space-between;
+      border:1px solid white; background:rgba(17,17,17,0.95); padding:10px; margin-top:10px;
+    }
+    .money {
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    }
+    .badge {
+      border:1px solid #777; background:#222; padding:6px 10px; border-radius:0;
+    }
+    .limit-on { color:#9cff9c; border-color:#3a5; }
+    .limit-off { color:#ffcd7f; border-color:#a63; }
+
+    .cat-strip {
+      display:flex; gap:6px; flex-wrap:wrap;
+    }
+    .cat-btn {
+      border:1px solid white; background:#1a1a1a; padding:6px 10px; cursor:pointer; border-radius:0;
+    }
+    .cat-btn.active { background:#333; }
+
+    /* ====== Category view ====== */
+    .category-panel {
+      border:1px solid white; background:#111; margin-top:12px;
+    }
+    .category-header {
+      display:flex; gap:10px; align-items:center; justify-content:space-between;
+      padding:10px; border-bottom:1px solid #333; background:#111;
+    }
+    .category-title { margin:0; font-size:18px; }
+    .category-controls { display:flex; gap:8px; flex-wrap:wrap; }
+
+    .items-wrap { padding:10px; }
+    .grid {
+      display:grid; gap:10px;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    }
+    .item-card {
+      border:1px solid #444; background:#1a1a1a; padding:10px; border-radius:0;
+      display:flex; flex-direction:column; gap:8px; min-height:120px;
+    }
+    .item-top { display:flex; justify-content:space-between; gap:8px; }
+    .item-name { font-weight:bold; }
+    .item-price { white-space:nowrap; }
+    .item-desc { opacity:0.9; font-size:14px; }
+
+    /* "Show all" dropdown */
+    .all-wrap { border-top:1px dashed #444; margin-top:12px; padding-top:12px; }
+    .all-list { margin-top:10px; }
+
+    /* ====== Inventory ====== */
+    .inventory {
+      border:1px solid white; background:#111; margin-top:16px;
+      padding:12px;
+    }
+    .inv-header {
+      display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:8px; margin-bottom:8px;
+    }
+    .inv-groups {
+      display:grid; gap:12px;
+      grid-template-columns: 1fr;
+    }
+    .inv-group { border:1px solid #333; padding:10px; background:#0f0f0f; }
+    .inv-group h3 { margin:0 0 6px 0; font-size:16px; }
+    .inv-item {
+      display:flex; justify-content:space-between; align-items:center;
+      border:1px solid #444; background:#1a1a1a; padding:6px 8px; margin:6px 0;
+    }
+    .muted { opacity:0.85; }
+    .monospace { font-family: "Courier New", Courier, monospace; }
+
+    @media (max-width: 768px) {
+      .content { padding: 15px; }
+    }
+	
+.deadlands-btn {
+    display: block;
+    margin: 10px;
+    padding: 10px 15px;
+    background-color: #824c29; /* Discord purple */
+    color: white;
+    text-align: center;
+    border-radius: 8px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+
+  .deadlands-btn:hover {
+    background-color: #5f3316; /* Slightly darker hover */
+  }
+	  .discord-btn {
+    display: block;
+    margin: 10px;
+    padding: 10px 15px;
+    background-color: #5865F2; /* Discord purple */
+    color: white;
+    text-align: center;
+    border-radius: 8px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+
+  .discord-btn:hover {
+    background-color: #4752c4; /* Slightly darker hover */
+  }
+  
+  
+    .forgotten-realms-btn {
+    display: block;
+    margin: 10px;
+    padding: 10px 15px;
+    background-color: #8B0000; /* Dark red */
+    color: white;
+    text-align: center;
+    border-radius: 8px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+
+  .forgotten-realms-btn:hover {
+    background-color: #5c0000; /* Darker red on hover */
+  }
+	
+	
+	     .Sanguis-btn {
+    display: block;
+    margin: 10px;
+    padding: 10px 15px;
+    background-color: black; /* Dark red */
+    color: white;
+    text-align: center;
+    border-radius: 8px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+
+  .Sanguis-btn:hover {
+    background-color: #5c0000; /* Darker red on hover */
+  }
+
+  </style>
+</head>
+<body>
+  <div class="overlay"></div>
+
+  <!-- Left nav trigger -->
+  <button class="openbtn" onclick="openNav()">☰ Menu</button>
+
+  <!-- Left navigation sidebar -->
+  <div id="navSidebar" class="sidebar" aria-hidden="true">
+    <span class="closebtn" onclick="closeNav()">×</span>
+  <a href="index.html">Home</a>
+  <a href="guide.html">Deadlands: Custodial Edition Intro</a>
+  <a href="generator.html">Character Idea Generator</a>
+  <a href="builder.html">Character/Stat Builder</a>
+  <a href="shop.html">Inventory Helper/Shop</a>
+  <br><br><br>
+  <a href="https://discord.gg/yMx6j79yez" target="_blank" class="discord-btn">Discord</a>
+    <a href="https://janitorai.com/characters/6af72b1b-d44f-4966-845f-67a2ff20adfe_character-%E2%98%A0%EF%B8%8E%EF%B8%8E-deadlands-rpg-%F0%9F%82%A1" target="_blank" class="deadlands-btn">Deadlands RPG on Janitor AI</a>
+
+<p> More Modules: </p>
+    <a href="https://bimaadizi.github.io/Forgotten-Realms-RPG/" target="_blank" class="forgotten-realms-btn">DnD/RPG Prompts</a>
+
+    <a href="https://bimaadizi.github.io/Sanguis/" target="_blank" class="Sanguis-btn">Vampire Prompts</a>
+
+  </div>
+
+  <img src="logo.png" alt="Logo" class="logo" />
+
+  <div class="content">
+    <div class="topbar">
+      <div class="money">
+        <span class="badge">Cash: <span id="cashAmt">$100.00</span></span>
+        <button id="toggleLimit" class="btn">Disable Money Limit</button>
+        <span id="limitBadge" class="badge limit-on">Limit: ON</span>
+      </div>
+      <div class="cat-strip" id="catStrip"></div>
+    </div>
+
+    <section class="category-panel" id="categoryPanel" style="display:none;">
+      <div class="category-header">
+        <h2 class="category-title" id="catTitle">Category</h2>
+        <div class="category-controls">
+          <button id="btnRegen" class="btn">Regenerate Selection</button>
+          <button id="btnToggleAll" class="btn">Show All Items</button>
+        </div>
+      </div>
+      <div class="items-wrap">
+        <div class="grid" id="featuredGrid"></div>
+
+        <div class="all-wrap" id="allWrap" style="display:none;">
+          <div class="all-list grid" id="allGrid"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INVENTORY -->
+    <section class="inventory">
+      <div class="inv-header">
+        <h2 style="margin:0;">Inventory</h2>
+        <button id="btnCopyInv" class="btn">Copy Inventory</button>
+      </div>
+      <div class="inv-groups">
+        <div class="inv-group">
+          <h3>Weapons</h3>
+          <div id="invWeapons"></div>
+        </div>
+        <div class="inv-group">
+          <h3>Ammo</h3>
+          <div id="invAmmo"></div>
+        </div>
+        <div class="inv-group">
+          <h3>Items</h3>
+          <div id="invItems"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    /********************************************************************
+     * DATA ———— Edit here to add/change items and prices.
+     * Each item: { id, name, price, desc?, invType: 'Weapons'|'Ammo'|'Items', copyName? }
+     * Starter kit: { id, name, price, kit:true, contents:[{id, name, price, desc?, invType, copyName?}] }
+     ********************************************************************/
+    const CATEGORIES = [
+      "Starter Kits",
+      "Guns & Weaponry",
+      "Ammunition",
+      "Drugs/Medicine",
+      "General Goods",
+      "Food",
+      "Alcohol",
+      "Watches",
+      "Clothing",
+      "Specialized Goods"
+    ];
+
+    const CATALOG = {
+      "Starter Kits": [
+        {
+          id: "kit_greenhorn",
+          name: "Greenhorn Starter Kit",
+          price: 18,
+          kit: true,
+          contents: [
+            { id:"bedroll", name:"Bedroll", price:2, invType:"Items" },
+            { id:"canteen", name:"Canteen", price:2, invType:"Items", desc:"Full, 3 uses" },
+            { id:"rations", name:"Rations", price:3, invType:"Items", desc:"1/day" },
+            { id:"rations2", name:"Rations", price:3, invType:"Items", desc:"1/day" },
+            { id:"rations3", name:"Rations", price:3, invType:"Items", desc:"1/day" },
+            { id:"matches", name:"Matches", price:1, invType:"Items" },
+            { id:"lantern", name:"Lantern", price:4, invType:"Items" }
+          ]
+        },
+        {
+          id: "kit_gunslinger",
+          name: "Gunslinger Kit",
+          price: 32,
+          kit: true,
+          contents: [
+            { id:"colt44", name:"Colt .44", price:20, invType:"Weapons", desc:"3d6, 6-round revolver. Ammo: .44", copyName:"Colt .44" },
+            { id:"ammo44_box", name:".44 (box of 50)", price:3, invType:"Ammo", copyName:".44" },
+            { id:"holster", name:"Holster", price:3, invType:"Items" },
+            { id:"cleaning", name:"Gun Cleaning Kit", price:6, invType:"Items" }
+          ]
+        },
+        {
+          id: "kit_prospector",
+          name: "Prospector Kit",
+          price: 25,
+          kit:true,
+          contents:[
+            { id:"pickaxe", name:"Pickaxe", price:5, invType:"Items" },
+            { id:"shovel", name:"Shovel", price:3, invType:"Items" },
+            { id:"pan", name:"Gold Pan", price:2, invType:"Items" },
+            { id:"lantern2", name:"Lantern", price:4, invType:"Items" },
+            { id:"rope", name:"Rope (50 ft)", price:2, invType:"Items" },
+            { id:"canteen2", name:"Canteen", price:2, invType:"Items" },
+            { id:"rations4", name:"Rations", price:3, invType:"Items", desc:"1/day" },
+            { id:"rations5", name:"Rations", price:3, invType:"Items", desc:"1/day" }
+          ]
+        },
+        {
+          id: "kit_explorer",
+          name: "Explorer Kit",
+          price: 27,
+          kit:true,
+          contents:[
+            { id:"compass", name:"Compass", price:4, invType:"Items" },
+            { id:"mapset", name:"Map Set", price:3, invType:"Items" },
+            { id:"binoculars", name:"Binoculars", price:10, invType:"Items" },
+            { id:"bedroll2", name:"Bedroll", price:2, invType:"Items" },
+            { id:"canteen3", name:"Canteen", price:2, invType:"Items" },
+            { id:"rations6", name:"Rations", price:3, invType:"Items", desc:"1/day" },
+            { id:"matches2", name:"Matches", price:1, invType:"Items" },
+            { id:"lantern3", name:"Lantern", price:2, invType:"Items" }
+          ]
+        }
+      ],
+
+      "Guns & Weaponry": [
+        { id:"gatling_gun_45", name:"Gatling Gun (.45)", price:1500.0, invType:"Weapons", desc:"Type: Automatic | Damage: 2d8 | Shots: 100" },
+        { id:"sharps_55_57", name:"Sharps ’55 (.57)", price:30.0, invType:"Weapons", desc:"Type: Carbine | Damage: 2d8 | Shots: 1" },
+        { id:"spencer_56", name:"Spencer (.56)", price:15.0, invType:"Weapons", desc:"Type: Carbine | Damage: 2d8 | Shots: 7" },
+        { id:"lemat_carbine_42", name:"LeMat Carbine (.42)", price:35.0, invType:"Weapons", desc:"Type: Carbine | Damage: 2d8 | Shots: 9" },
+        { id:"derringer_41", name:"Derringer (.41)", price:8.0, invType:"Weapons", desc:"Type: Derringer | Damage: 2d6 | Shots: 2" },
+        { id:"english_1840_model_36", name:"English 1840 Model (.36)", price:5.0, invType:"Weapons", desc:"Type: Derringer | Damage: 2d6 | Shots: 8" },
+        { id:"rupertus_pepperbox_22", name:"Rupertus Pepperbox (.22)", price:6.0, invType:"Weapons", desc:"Type: Pepperbox | Damage: 2d6 | Shots: 8" },
+        { id:"wesson_dagger_pistol_41", name:"Wesson Dagger-Pistol (.41)", price:6.0, invType:"Weapons", desc:"Type: Dagger-Pistol | Damage: 2d6 | Shots: 2" },
+        { id:"colt_army_44", name:"Colt Army (.44)", price:12.0, invType:"Weapons", desc:"Type: Revolver (Single-Action) | Damage: 2d6+1 | Shots: 6" },
+        { id:"colt_buntline_special_45", name:"Colt Buntline Special (.45)", price:500.0, invType:"Weapons", desc:"Type: Revolver (Single-Action) | Damage: 2d6+1 | Shots: 6" },
+        { id:"colt_dragoon_44", name:"Colt Dragoon (.44)", price:17.0, invType:"Weapons", desc:"Type: Revolver (Single-Action) | Damage: 2d6+1 | Shots: 6" },
+        { id:"colt_navy_36", name:"Colt Navy (.36)", price:10.0, invType:"Weapons", desc:"Type: Revolver (Single-Action) | Damage: 2d6 | Shots: 6" },
+        { id:"colt_peacemaker_45", name:"Colt Peacemaker (.45)", price:15.0, invType:"Weapons", desc:"Type: Revolver (Single-Action) | Damage: 2d6+1 | Shots: 6" },
+        { id:"lemat_grapeshot_pistol_40", name:"Lemat Grapeshot Pistol (.40)", price:25.0, invType:"Weapons", desc:"Type: Revolver (Single-Action) | Damage: 2d6 | Shots: 9" },
+        { id:"colt_frontier_32_20", name:"Colt Frontier (.32–20)", price:8.0, invType:"Weapons", desc:"Type: Revolver (Double-Action) | Damage: 2d6 | Shots: 6" },
+        { id:"colt_lightning_38", name:"Colt Lightning (.38)", price:13.0, invType:"Weapons", desc:"Type: Revolver (Double-Action) | Damage: 2d6 | Shots: 6" },
+        { id:"colt_peacemaker_45_2", name:"Colt Peacemaker (.45)", price:15.0, invType:"Weapons", desc:"Type: Revolver (Double-Action) | Damage: 2d6+1 | Shots: 6" },
+        { id:"colt_thunderer_41", name:"Colt Thunderer (.41)", price:14.0, invType:"Weapons", desc:"Type: Revolver (Double-Action) | Damage: 2d6 | Shots: 6" },
+        { id:"starr_revolver_44", name:"Starr Revolver (.44)", price:9.0, invType:"Weapons", desc:"Type: Revolver (Double-Action) | Damage: 2d6+1 | Shots: 6" },
+        { id:"ballard_72_56", name:"Ballard ’72 (.56)", price:24.0, invType:"Weapons", desc:"Type: Rifle | Damage: 2d8 | Shots: 1" },
+        { id:"bullard_express_50", name:"Bullard Express (.50)", price:30.0, invType:"Weapons", desc:"Type: Rifle | Damage: 2d10 | Shots: 11" },
+        { id:"colt_paterson_model_36_69", name:"Colt-Paterson Model ’36 (.69)", price:25.0, invType:"Weapons", desc:"Type: Rifle | Damage: 2d10 | Shots: 7" },
+        { id:"colt_revolving_rifle_56", name:"Colt Revolving Rifle (.56)", price:24.0, invType:"Weapons", desc:"Type: Rifle | Damage: 2d8 | Shots: 5" },
+        { id:"enfield_musket_58", name:"Enfield Musket (.58)", price:25.0, invType:"Weapons", desc:"Type: Rifle | Damage: 2d8 | Shots: 1" },
+        { id:"evans_old_model_sporter_44", name:"Evans Old Model Sporter (.44)", price:30.0, invType:"Weapons", desc:"Type: Rifle | Damage: 2d8 | Shots: 34" },
+        { id:"sharp_s_big_50_50", name:"Sharp’s Big 50 (.50)", price:20.0, invType:"Weapons", desc:"Type: Rifle | Damage: 2d10 | Shots: 1" },
+        { id:"springfield_58", name:"Springfield (.58)", price:8.0, invType:"Weapons", desc:"Type: Rifle | Damage: 2d10 | Shots: 1" },
+        { id:"winchester_73_44_40", name:"Winchester ‘73 (.44–40)", price:45.0, invType:"Weapons", desc:"Type: Rifle | Damage: 2d8 | Shots: 15" },
+        { id:"winchester_76_45", name:"Winchester ‘76 (.45)", price:40.0, invType:"Weapons", desc:"Type: Rifle | Damage: 2d8 | Shots: 15" },
+        { id:"colt_revolving_shotgun", name:"Colt Revolving Shotgun", price:45.0, invType:"Weapons", desc:"Type: Shotgun | Damage: 1–3d6 | Shots: 5" },
+        { id:"double_barrel_shotgun", name:"Double Barrel Shotgun", price:35.0, invType:"Weapons", desc:"Type: Shotgun | Damage: 1–3d6 | Shots: 2" },
+        { id:"scattergun", name:"Scattergun", price:35.0, invType:"Weapons", desc:"Type: Shotgun | Damage: 1–3d6 | Shots: 2" },
+        { id:"single_barrel_shotgun", name:"Single Barrel Shotgun", price:25.0, invType:"Weapons", desc:"Type: Shotgun | Damage: 1–3d6 | Shots: 1" },
+        { id:"winchester_lever_action_shotgun_entry", name:"Winchester Lever-Action (shotgun entry)", price:35.0, invType:"Weapons", desc:"Type: Shotgun | Damage: 1–3d6 | Shots: 4" },
+        { id:"bolas", name:"Bolas", price:3.0, invType:"Weapons", desc:"Type: Other Ranged Weapon | Damage: Str+1 | Shots: 1" },
+        { id:"bow", name:"Bow", price:3.0, invType:"Weapons", desc:"Type: Other Ranged Weapon | Damage: 2d6 | Shots: 1" },
+        { id:"dynamite_per_stick", name:"Dynamite (per stick)", price:3.0, invType:"Weapons", desc:"Type: Other Ranged Weapon | Damage: 2d6/stick | Shots: 1" },
+        { id:"nitro_8_oz_bottle", name:"Nitro (8 oz. bottle)", price:1.25, invType:"Weapons", desc:"Type: Other Ranged Weapon | Damage: 3d6 | Shots: 1" },
+        { id:"brass_knuckles", name:"Brass Knuckles", price:1.0, invType:"Weapons", desc:"Type: Melee | Damage: Str+d4" },
+        { id:"club_war", name:"Club, War", price:3.0, invType:"Weapons", desc:"Type: Melee | Damage: Str+d6" },
+        { id:"club_war_bladed", name:"Club, War (Bladed)", price:8.0, invType:"Weapons", desc:"Type: Melee | Damage: Str+d8" },
+        { id:"knife", name:"Knife", price:2.0, invType:"Weapons", desc:"Type: Melee | Damage: Str+d4" },
+        { id:"knife_bowie", name:"Knife, Bowie", price:4.0, invType:"Weapons", desc:"Type: Melee | Damage: Str+d4+1" },
+        { id:"rapier", name:"Rapier", price:10.0, invType:"Weapons", desc:"Type: Melee | Damage: Str+d4" },
+        { id:"saber", name:"Saber", price:15.0, invType:"Weapons", desc:"Type: Melee | Damage: Str+d6" },
+        { id:"spear", name:"Spear", price:3.0, invType:"Weapons", desc:"Type: Melee | Damage: Str+d6" },
+        { id:"tomahawk", name:"Tomahawk", price:3.0, invType:"Weapons", desc:"Type: Melee | Damage: Str+d6" },
+      ],
+
+      "Ammunition": [
+        { id:"ammo_44", name:".44 (box of 50)", price:3, invType:"Ammo", copyName:".44" },
+        { id:"ammo_44_40", name:".44-40 (box of 50)", price:3, invType:"Ammo" },
+        { id:"ammo_56_56", name:".56-56 (box of 25)", price:3, invType:"Ammo" },
+        { id:"ammo_45_70", name:".45-70 (box of 20)", price:4, invType:"Ammo" },
+        { id:"ammo_12g", name:"12 gauge shells (box of 20)", price:2, invType:"Ammo", copyName:"12 gauge shells" },
+        { id:"ammo_38", name:".38 (box of 50)", price:2, invType:"Ammo" },
+        { id:"ammo_36", name:".36 (box of 50)", price:2, invType:"Ammo" },
+        { id:"ammo_caps", name:"Percussion Caps (tin)", price:1, invType:"Ammo" },
+        { id:"ammo_shot", name:"Shot & Powder (pouch)", price:2, invType:"Ammo" },
+        { id:"ammo_darts", name:"Throwing Darts (6)", price:1, invType:"Ammo" },
+        { id:"ammo_arrows", name:"Arrows (12)", price:2, invType:"Ammo" }
+      ],
+
+      "Drugs/Medicine": [
+        { id:"opium", name:"Opium", price:1.85, invType:"Items", desc:"Purpose: Painkiller, sedative, euphoria-inducer | Dosage: Smoked, tincture, pills" },
+        { id:"castor_oil", name:"Castor Oil", price:0.25, invType:"Items", desc:"Purpose: Laxative, general tonic | Dosage: Oral, spoonfuls" },
+        { id:"laudanum", name:"Laudanum", price:1.5, invType:"Items", desc:"Purpose: Painkiller, cough suppressant | Dosage: Oral tincture, drops in water" },
+        { id:"coca_leaves_cocaine", name:"Coca Leaves (Cocaine)", price:2.0, invType:"Items", desc:"Purpose: Stimulant, fatigue aid | Dosage: Chewed, brewed in tea, tincture" },
+        { id:"syringe", name:"Syringe", price:0.2, invType:"Items", desc:"Purpose: Delivery device | Dosage: One unit" },
+        { id:"morphine_vial", name:"Morphine Vial", price:2.0, invType:"Items", desc:"Purpose: Strong analgesic | Dosage: Injectable, 12-dose vial" },
+        { id:"cannabis", name:"Cannabis", price:2.1, invType:"Items", desc:"Purpose: Sedative, pain relief, appetite aid | Dosage: Smoked, tincture, pill" },
+        { id:"cincho_quinae", name:"Cincho-Quinae", price:0.3, invType:"Items", desc:"Purpose: Fever reducer, malaria treatment | Dosage: Pills or tonics" },
+        { id:"quinine_citrate", name:"Quinine Citrate", price:5.75, invType:"Items", desc:"Purpose: Anti-malarial, fever reducer | Dosage: Small pills" },
+        { id:"uterine_tonic", name:"Uterine Tonic", price:0.75, invType:"Items", desc:"Purpose: Women’s health aid | Dosage: Oral tonic, pint bottle" },
+        { id:"bromine_of_iron", name:"Bromine of Iron", price:3.8, invType:"Items", desc:"Purpose: Tonic for anemia | Dosage: Oral tonic, 4oz bottle" },
+        { id:"ladies_slipper_root", name:"Ladies Slipper Root", price:0.38, invType:"Items", desc:"Purpose: Nervine, mild sedative | Dosage: Dried herb, teas" },
+        { id:"hypophosphite_of_calcium", name:"Hypophosphite of Calcium", price:2.85, invType:"Items", desc:"Purpose: General tonic, consumptive aid | Dosage: Oral tonic, 4oz bottles" },
+        { id:"white_pine_compound", name:"White Pine Compound", price:2.0, invType:"Items", desc:"Purpose: Cough syrup | Dosage: Oral tonic, pint bottle" },
+        { id:"iron_citrate", name:"Iron Citrate", price:0.19, invType:"Items", desc:"Purpose: Blood tonic | Dosage: Pills, tablets" },
+        { id:"poppy_heads", name:"Poppy Heads", price:0.55, invType:"Items", desc:"Purpose: Mild sedative | Dosage: Decoction, per lb" },
+        { id:"pepsin", name:"Pepsin", price:1.0, invType:"Items", desc:"Purpose: Digestive aid | Dosage: Powder, per lb" },
+        { id:"aconite", name:"Aconite", price:0.55, invType:"Items", desc:"Purpose: Pain relief, heart depressant | Dosage: Tincture, pint bottle" },
+        { id:"buchu", name:"Buchu", price:0.8, invType:"Items", desc:"Purpose: Urinary remedy | Dosage: Infusion, pint bottle" },
+        { id:"hyoscyamus", name:"Hyoscyamus", price:0.55, invType:"Items", desc:"Purpose: Sedative, hallucinations | Dosage: Tincture, pint bottle" },
+        { id:"rhubarb", name:"Rhubarb", price:2.0, invType:"Items", desc:"Purpose: Purgative, stomach tonic | Dosage: Powder, per lb" },
+        { id:"rose_water", name:"Rose Water", price:1.25, invType:"Items", desc:"Purpose: Soothing wash, cosmetic | Dosage: Per lb bottle" },
+        { id:"boric_acid", name:"Boric Acid", price:0.75, invType:"Items", desc:"Purpose: Disinfectant, antiseptic | Dosage: Powder, per lb" },
+        { id:"chlorodyne", name:"Chlorodyne", price:2.5, invType:"Items", desc:"Purpose: Painkiller, cough & diarrhea remedy | Dosage: Tincture, per lb" },
+        { id:"mercury", name:"Mercury", price:0.15, invType:"Items", desc:"Purpose: Syphilis treatment | Dosage: Pills, per 100 tabs" },
+        { id:"belladonna", name:"Belladonna", price:0.55, invType:"Items", desc:"Purpose: Muscle relaxant, sedative | Dosage: Tincture, per pint" },
+        { id:"nux_vomica", name:"Nux Vomica", price:1.2, invType:"Items", desc:"Purpose: Stimulant, appetite aid | Dosage: Tincture, per pint bottle" },
+        { id:"arsenic", name:"Arsenic", price:0.15, invType:"Items", desc:"Purpose: Tonic, skin treatments | Dosage: Pills, per 100 tabs" },
+        { id:"magnesia", name:"Magnesia", price:0.9, invType:"Items", desc:"Purpose: Antacid, laxative | Dosage: Powder, per lb bottle" },
+        { id:"strychnine", name:"Strychnine", price:0.15, invType:"Items", desc:"Purpose: Stimulant, poison | Dosage: Pills, per 100 tabs" },
+        { id:"chloroform", name:"Chloroform", price:0.75, invType:"Items", desc:"Purpose: Anesthetic, sedative | Dosage: Inhaled, pint bottle" },
+        { id:"soap", name:"Soap", price:0.65, invType:"Items", desc:"Purpose: Cleaning, disinfectant | Dosage: Per pint" },
+        { id:"ipecac", name:"Ipecac", price:5.0, invType:"Items", desc:"Purpose: Emetic (induces vomiting) | Dosage: Oral syrup, pint bottle" },
+        { id:"tobacco", name:"Tobacco", price:1.6, invType:"Items", desc:"Purpose: Stimulant, appetite suppressant | Dosage: Chew, smoke, snuff" },
+        { id:"snake_oil", name:"Snake Oil", price:10.0, invType:"Items", desc:"Purpose: Patent cure-all | Dosage: Oral tonic, per lb" },
+        { id:"orange_peel_bitter", name:"Orange Peel Bitter", price:1.05, invType:"Items", desc:"Purpose: Digestive tonic | Dosage: Tincture, per pint" },
+        { id:"mercury_with_chalk", name:"Mercury with Chalk", price:0.15, invType:"Items", desc:"Purpose: Syphilis remedy | Dosage: Pills, per 100" },
+        { id:"camphor", name:"Camphor", price:0.6, invType:"Items", desc:"Purpose: Stimulant, decongestant | Dosage: Oil, per pint" },
+        { id:"sarsaparilla", name:"Sarsaparilla", price:1.3, invType:"Items", desc:"Purpose: Blood purifier, tonic | Dosage: Syrup, per pint bottle" },
+        { id:"witch_hazel", name:"Witch Hazel", price:0.9, invType:"Items", desc:"Purpose: Astringent, wound wash | Dosage: Tonic, per pint bottle" },
+        { id:"capsicum", name:"Capsicum", price:0.75, invType:"Items", desc:"Purpose: Pain relief, digestive stimulant | Dosage: Liniment, per pint" },
+        { id:"digitalis", name:"Digitalis", price:0.15, invType:"Items", desc:"Purpose: Heart medicine | Dosage: Pills, per 100 tabs" },
+        { id:"chloral_hydrate", name:"Chloral Hydrate", price:1.1, invType:"Items", desc:"Purpose: Sedative, hypnotic | Dosage: Tincture, per pint" },
+        { id:"quassia", name:"Quassia", price:1.0, invType:"Items", desc:"Purpose: Bitter tonic, digestive aid | Dosage: Infusion, per pint" },
+        { id:"creosote", name:"Creosote", price:0.4, invType:"Items", desc:"Purpose: Antiseptic, cough treatment | Dosage: Tablets, per 100" },
+        { id:"seidlitz_powders", name:"Seidlitz Powders", price:28.0, invType:"Items", desc:"Purpose: Laxative, hangover cure | Dosage: Effervescent powders" },
+        { id:"senna_leaves", name:"Senna Leaves", price:1.4, invType:"Items", desc:"Purpose: Laxative | Dosage: Decoction, per pint bottle" },
+        { id:"absinthe", name:"Absinthe", price:2.5, invType:"Items", desc:"Purpose: Stimulant, hallucinogenic tonic | Dosage: Diluted spirit, per bottle" },
+        { id:"radium_water", name:"Radium Water", price:5.0, invType:"Items", desc:"Purpose: Vitality tonic (quack cure) | Dosage: Bottled water, per pint" },
+        { id:"kerosene", name:"Kerosene", price:0.4, invType:"Items", desc:"Purpose: Folk remedy, lice & parasite cure | Dosage: Applied externally, pint bottle" },
+        { id:"sulphur", name:"Sulphur", price:0.3, invType:"Items", desc:"Purpose: Skin treatment, spring tonic | Dosage: Powder, per lb" },
+        { id:"turpentine", name:"Turpentine", price:0.35, invType:"Items", desc:"Purpose: Chest rub, wound wash, vermifuge | Dosage: Liniment, per pint" },
+        { id:"epsom_salts", name:"Epsom Salts", price:0.25, invType:"Items", desc:"Purpose: Laxative, soak for aches | Dosage: Powder, per lb" },
+        { id:"field_first_aid_kit_small", name:"Field First Aid Kit (Small)", price:1.25, invType:"Items", desc:"Contents: lint bandage x4, gauze pads x4, adhesive plaster, safety pins, tourniquet strap, scissors, smelling salts, carbolic wipes" },
+        { id:"bandage_roll_lint", name:"Bandage Roll (Lint)", price:0.05, invType:"Items", desc:"Size: 3 in x 5 yd" },
+        { id:"absorbent_cotton", name:"Absorbent Cotton", price:0.25, invType:"Items", desc:"Weight: 4 oz bag" },
+        { id:"tourniquet_strap_buckle", name:"Tourniquet Strap (Buckle)", price:0.5, invType:"Items", desc:"Width: 1 in" },
+        { id:"splint_set_willow_slats", name:"Splint Set (Willow Slats)", price:0.75, invType:"Items", desc:"Pieces: 4 with ties" },
+        { id:"thermometer_clinical", name:"Thermometer (Clinical)", price:1.5, invType:"Items", desc:"Type: Mercury-in-glass" },
+        { id:"stethoscope_monaural_wood", name:"Stethoscope (Monaural Wood)", price:1.0, invType:"Items", desc:"Length: 7 in" },
+        { id:"cupping_set_4_glass_cups_flame", name:"Cupping Set (4 Glass Cups + Flame)", price:3.0, invType:"Items", desc:"Case: leatherette" },
+        { id:"lancet_fleam", name:"Lancet (Fleam)", price:0.2, invType:"Items", desc:"Blades: 2 steel" },
+        { id:"suture_pack_silk_needles", name:"Suture Pack (Silk & Needles)", price:0.4, invType:"Items", desc:"Contents: 10 ft silk, 3 curved needles" },
+        { id:"glass_vials_stoppered", name:"Glass Vials (Stoppered)", price:0.3, invType:"Items", desc:"Set: 12 x 1 oz" },
+        { id:"pill_boxes_tin", name:"Pill Boxes (Tin)", price:0.1, invType:"Items", desc:"Set: 6" },
+        { id:"mortar_pestle_porcelain", name:"Mortar & Pestle (Porcelain)", price:0.75, invType:"Items", desc:"Size: 3 in bowl" },
+        { id:"surgical_scissors_curved", name:"Surgical Scissors (Curved)", price:0.4, invType:"Items", desc:"Length: 5 in" },
+        { id:"adrenal_booster", name:"Adrenal Booster", price:200.0, invType:"Items", desc:"Purpose: Stimulant, strength & endurance enhancer | Dosage: Oral tonic, 1 dose" },
+        { id:"caustic_vapors", name:"Caustic Vapors", price:125.0, invType:"Items", desc:"Purpose: Weaponized acid gas | Dosage: Pills exposed to air, 1 dose" },
+        { id:"choking_gas", name:"Choking Gas", price:90.0, invType:"Items", desc:"Purpose: Non-lethal incapacitant | Dosage: Breakable vial, 1 dose" },
+        { id:"cohesion_coating", name:"Cohesion Coating", price:80.0, invType:"Items", desc:"Purpose: Temporary armor hardener | Dosage: Liquid coating, 1 dose" },
+        { id:"dehydrated_air_tablets", name:"Dehydrated Air Tablets", price:30.0, invType:"Items", desc:"Purpose: Breathing aid in smoke or water | Dosage: Tablet, 1 dose" },
+        { id:"de_inebriating_tonic", name:"De-Inebriating Tonic", price:10.0, invType:"Items", desc:"Purpose: Sobering agent, poison purge | Dosage: Oral tonic, 1 dose" },
+        { id:"depigmentative_paint", name:"Depigmentative Paint", price:1000.0, invType:"Items", desc:"Purpose: Invisibility coating | Dosage: Liquid paint, per gallon" },
+        { id:"exbalming_fluid", name:"Exbalming Fluid", price:100.0, invType:"Items", desc:"Purpose: Corpse disposal, anti-undead weapon | Dosage: Splash or pour, 1 dose" },
+        { id:"enfeebling_powder", name:"Enfeebling Powder", price:40.0, invType:"Items", desc:"Purpose: Sedative, prisoner control | Dosage: Powdered mix, 1 dose" },
+        { id:"exfoliant_oil", name:"Exfoliant Oil", price:40.0, invType:"Items", desc:"Purpose: Plant killer, battlefield clearer | Dosage: Burned oil, 1 dose" },
+        { id:"greased_lightning_pills", name:"Greased Lightning Pills", price:75.0, invType:"Items", desc:"Purpose: Reflex stimulant | Dosage: Oral pill, 1 dose" },
+        { id:"greek_fire", name:"Greek Fire", price:100.0, invType:"Items", desc:"Purpose: Incendiary weapon | Dosage: Thrown vial, 1 dose" },
+        { id:"healing_unguent", name:"Healing Unguent", price:80.0, invType:"Items", desc:"Purpose: Wound healer | Dosage: Salve, 1 dose" },
+        { id:"lethe_water", name:"Lethe Water", price:70.0, invType:"Items", desc:"Purpose: Memory eraser | Dosage: Oral tonic, 1 dose" },
+        { id:"liquid_courage", name:"Liquid Courage", price:30.0, invType:"Items", desc:"Purpose: Fear suppressant, bravery tonic | Dosage: Oral tonic, 1 dose" },
+        { id:"metabolic_elevation_tonic", name:"Metabolic Elevation Tonic", price:50.0, invType:"Items", desc:"Purpose: Stimulant, rapid weight loss | Dosage: Oral tonic, 1 dose" },
+        { id:"oral_inflammator", name:"Oral Inflammator", price:80.0, invType:"Items", desc:"Purpose: Personal flamethrower | Dosage: Oral pill, 1 dose" },
+        { id:"owl_eye_tonic", name:"Owl-Eye Tonic", price:75.0, invType:"Items", desc:"Purpose: Night vision enhancer | Dosage: Oral tonic, 1 dose" },
+        { id:"oxidizing_oil", name:"Oxidizing Oil", price:50.0, invType:"Items", desc:"Purpose: Metal corrosive | Dosage: Liquid coat, 1 dose" },
+        { id:"palliative_balm", name:"Palliative Balm", price:25.0, invType:"Items", desc:"Purpose: Wound cleanser, surface healer | Dosage: Salve, 1 dose" },
+        { id:"restoration_elixir", name:"Restoration Elixir", price:150.0, invType:"Items", desc:"Purpose: Recovery tonic | Dosage: Oral draught, 1 dose" },
+        { id:"revitalizing_tonic", name:"Revitalizing Tonic", price:10.0, invType:"Items", desc:"Purpose: Energy booster | Dosage: Oral tonic, 1 dose" },
+        { id:"revivification_elixir", name:"Revivification Elixir", price:2000.0, invType:"Items", desc:"Purpose: Resurrection draught | Dosage: Oral elixir, 1 dose" },
+        { id:"sampson_s_elixir", name:"Sampson’s Elixir", price:60.0, invType:"Items", desc:"Purpose: Strength enhancer | Dosage: Oral tonic, 1 dose" },
+        { id:"slumber_gas", name:"Slumber Gas", price:30.0, invType:"Items", desc:"Purpose: Sleep-inducing weapon | Dosage: Breakable vial, 1 dose" },
+        { id:"slumber_liquid", name:"Slumber Liquid", price:25.0, invType:"Items", desc:"Purpose: Sleep draught | Dosage: Oral tonic, 1 dose" },
+        { id:"smoke_pellet", name:"Smoke Pellet", price:5.0, invType:"Items", desc:"Purpose: Distraction, cover | Dosage: Pellet, 1 use" },
+        { id:"soul_sight_elixir", name:"Soul Sight Elixir", price:100.0, invType:"Items", desc:"Purpose: Spirit-vision tonic | Dosage: Oral tonic, 1 dose" },
+        { id:"sure_shot_elixir", name:"Sure Shot Elixir", price:75.0, invType:"Items", desc:"Purpose: Aim stabilizer | Dosage: Oral tonic, 1 dose" },
+        { id:"tactile_desensitizer", name:"Tactile Desensitizer", price:30.0, invType:"Items", desc:"Purpose: Pain-numbing anesthetic | Dosage: Oral tonic, 1 dose" },
+        { id:"tourniquet_in_a_bottle", name:"Tourniquet in a Bottle", price:10.0, invType:"Items", desc:"Purpose: Anti-bleeding tonic | Dosage: Oral or topical, 1 dose" },
+        { id:"universal_lubricant", name:"Universal Lubricant", price:150.0, invType:"Items", desc:"Purpose: Anti-friction alchemical oil | Dosage: Liquid, 1 bottle" },
+        { id:"vocal_unction_elixir", name:"Vocal Unction Elixir", price:50.0, invType:"Items", desc:"Purpose: Voice enhancer | Dosage: Oral syrup, 1 dose" },
+      ],
+
+      "General Goods": [
+        { id:"tape_measure_cloth", name:"Tape Measure (Cloth)", price:0.15, invType:"Items", desc:"Size: 60 in" },
+        { id:"folding_ruler_boxwood_brass", name:"Folding Ruler (Boxwood & Brass)", price:0.3, invType:"Items", desc:"Length: 2 ft (folding)" },
+        { id:"leather_satchel_doctor_s_style", name:"Leather Satchel (Doctor’s Style)", price:1.62, invType:"Items", desc:"Options: 9\\\" ; 11\\\" ; 13\\" },
+        { id:"traveling_bag", name:"Traveling Bag", price:0.65, invType:"Items", desc:"Size: 15 in" },
+        { id:"railroad_traveling_bag", name:"Railroad Traveling Bag", price:1.5, invType:"Items", desc:"Size: 18 in" },
+        { id:"basket_black_stained_willow", name:"Basket (Black-Stained Willow)", price:0.25, invType:"Items", desc:"Capacity: 2 gal" },
+        { id:"pocket_book_leather_bound_blank", name:"Pocket Book (Leather-Bound, Blank)", price:0.25, invType:"Items", desc:"Size: 3½\\\"×5\\" },
+        { id:"dip_pen_steel_nib_holder", name:"Dip Pen (Steel Nib & Holder)", price:0.15, invType:"Items", desc:"Nibs: 3" },
+        { id:"graphite_pencil_hb", name:"Graphite Pencil (HB)", price:0.12, invType:"Items", desc:"Box: 6" },
+        { id:"lantern_tin_kerosene", name:"Lantern (Tin Kerosene)", price:1.0, invType:"Items", desc:"No. 2 burner" },
+        { id:"tin_shaving_kit_field", name:"Tin Shaving Kit (Field)", price:0.9, invType:"Items", desc:"Contents: razor, strop, tallow soap, boar brush, mirror, tin case" },
+        { id:"lariat_lasso_hemp", name:"Lariat / Lasso (Hemp)", price:1.0, invType:"Items", desc:"Length: 40 ft" },
+        { id:"envelopes_writing", name:"Envelopes (Writing)", price:0.1, invType:"Items", desc:"Pack: 25" },
+        { id:"skeleton_key_set_lock_picks", name:"Skeleton Key Set (Lock Picks)", price:1.5, invType:"Items", desc:"Pieces: 5" },
+        { id:"surveyor_s_compass_chain", name:"Surveyor’s Compass & Chain", price:14.0, invType:"Items", desc:"Chain: 66 ft (Gunter’s)" },
+        { id:"insects_in_glass_curio", name:"Insects in Glass (Curio)", price:0.5, invType:"Items", desc:"Dome: 3 in" },
+        { id:"candles_tallow", name:"Candles (Tallow)", price:0.12, invType:"Items", desc:"Pack: 12" },
+        { id:"ink_eraser_knife", name:"Ink Eraser Knife", price:0.1, invType:"Items", desc:"Blade: carbon steel" },
+        { id:"pocket_telegraph_set", name:"Pocket Telegraph Set", price:2.5, invType:"Items", desc:"Pieces: key, sounder, coil, wire" },
+        { id:"pocket_level_brass_glass_vial", name:"Pocket Level (Brass/Glass Vial)", price:0.2, invType:"Items", desc:"Length: 3 in" },
+        { id:"hatchet_camp", name:"Hatchet (Camp)", price:0.85, invType:"Items", desc:"Head: 1¼ lb" },
+        { id:"pickaxe_miner_s", name:"Pickaxe (Miner’s)", price:1.75, invType:"Items", desc:"Head: 5 lb" },
+        { id:"hammer_claw", name:"Hammer (Claw)", price:0.6, invType:"Items", desc:"Weight: 16 oz" },
+        { id:"saddlebags_leather", name:"Saddlebags (Leather)", price:2.5, invType:"Items", desc:"Twin pockets" },
+        { id:"alarm_clock_wind_up", name:"Alarm Clock (Wind-Up)", price:1.25, invType:"Items", desc:"Bell: twin top" },
+        { id:"pocket_map_territory", name:"Pocket Map (Territory)", price:0.15, invType:"Items", desc:"Folded sheet" },
+        { id:"field_glass_binoculars", name:"Field Glass (Binoculars)", price:3.0, invType:"Items", desc:"3× brass" },
+        { id:"folding_camp_stool", name:"Folding Camp Stool", price:0.9, invType:"Items", desc:"Canvas & ash" },
+        { id:"crowbar_pry_bar", name:"Crowbar (Pry Bar)", price:0.9, invType:"Items", desc:"Length: 24 in" },
+        { id:"tongs_iron", name:"Tongs (Iron)", price:0.35, invType:"Items", desc:"Length: 12 in" },
+        { id:"spade_d_handle", name:"Spade (D-Handle)", price:1.25, invType:"Items", desc:"Blade: steel" },
+        { id:"auger_brace_bit", name:"Auger (Brace Bit)", price:0.75, invType:"Items", desc:"Size: ¾ in" },
+        { id:"thermometer_mercury_pocket", name:"Thermometer (Mercury, Pocket)", price:1.0, invType:"Items", desc:"Case: nickel" },
+        { id:"barometer_desk", name:"Barometer (Desk)", price:4.5, invType:"Items", desc:"Aneroid dial" },
+        { id:"dissecting_kit_student", name:"Dissecting Kit (Student)", price:3.5, invType:"Items", desc:"Contents: scalpel, forceps, scissors, probes, needles, case" },
+        { id:"pocket_sundial_brass", name:"Pocket Sundial (Brass)", price:1.25, invType:"Items", desc:"With compass" },
+        { id:"sealing_wax_red", name:"Sealing Wax (Red)", price:0.1, invType:"Items", desc:"Sticks: 3" },
+        { id:"ledger_seals_gummed_wafers", name:"Ledger Seals (Gummed Wafers)", price:0.15, invType:"Items", desc:"Pack: 50" },
+        { id:"fountain_pen_hard_rubber", name:"Fountain Pen (Hard Rubber)", price:1.5, invType:"Items", desc:"14k nib" },
+        { id:"saddle_working", name:"Saddle (Working)", price:18.0, invType:"Items", desc:"Tree: wood/rawhide" },
+        { id:"water_filter_cone_felt_charcoal", name:"Water Filter Cone (Felt/Charcoal)", price:0.4, invType:"Items", desc:"Size: quart" },
+        { id:"tin_cup", name:"Tin Cup", price:0.05, invType:"Items", desc:"Capacity: 8 oz" },
+        { id:"table_forks", name:"Table Forks", price:0.3, invType:"Items", desc:"Set: 6 (steel)" },
+        { id:"table_spoons", name:"Table Spoons", price:0.3, invType:"Items", desc:"Set: 6 (steel)" },
+        { id:"table_knives", name:"Table Knives", price:0.4, invType:"Items", desc:"Set: 6 (bone handle)" },
+        { id:"tin_plates", name:"Tin Plates", price:0.25, invType:"Items", desc:"Set: 4" },
+        { id:"rosary_beads_wood", name:"Rosary Beads (Wood)", price:0.5, invType:"Items", desc:"With crucifix" },
+        { id:"wire_cutters", name:"Wire Cutters", price:0.75, invType:"Items", desc:"Jaw: 6 in" },
+        { id:"ledger_binder_clasp", name:"Ledger Binder (Clasp)", price:0.5, invType:"Items", desc:"Fits 8\\\"×10\\" },
+        { id:"document_folder_manila", name:"Document Folder (Manila)", price:0.05, invType:"Items", desc:"Pack: 5" },
+        { id:"tin_lunch_pail", name:"Tin Lunch Pail", price:0.25, invType:"Items", desc:"With bail handle" },
+        { id:"spirit_photograph", name:"Spirit Photograph", price:0.5, invType:"Items", desc:"Plate: 4×6" },
+        { id:"false_mustache_human_hair", name:"False Mustache (Human Hair)", price:0.2, invType:"Items", desc:"Style: handlebar" },
+        { id:"make_up_kit_theatrical", name:"Make-Up Kit (Theatrical)", price:0.75, invType:"Items", desc:"Contents: greasepaint (3), powder, sponge, mirror" },
+        { id:"tent_canvas_2_man", name:"Tent (Canvas, 2-Man)", price:6.0, invType:"Items", desc:"Poles & stakes" },
+        { id:"music_box_pocket", name:"Music Box (Pocket)", price:2.0, invType:"Items", desc:"Tune: assorted" },
+        { id:"tarot_cards_78_card_deck", name:"Tarot Cards (78-Card Deck)", price:0.5, invType:"Items", desc:"Linen-finish" },
+        { id:"oil_can_hand", name:"Oil Can (Hand)", price:0.2, invType:"Items", desc:"Spout: long" },
+        { id:"native_medicine_bundle", name:"Native Medicine Bundle", price:1.5, invType:"Items", desc:"Contents: herbs, feathers, pouch" },
+        { id:"sheet_music_book", name:"Sheet Music Book", price:0.5, invType:"Items", desc:"24 popular airs" },
+        { id:"firecrackers_salute", name:"Firecrackers (Salute)", price:0.1, invType:"Items", desc:"Pack: 25" },
+        { id:"sewing_kit_housewife", name:"Sewing Kit (Housewife)", price:0.2, invType:"Items", desc:"Contents: needles, pins, thread cards, buttons, thimble, roll case" },
+        { id:"hand_can_tin_pour_can", name:"Hand Can (Tin Pour Can)", price:0.2, invType:"Items", desc:"Capacity: 1 qt" },
+        { id:"spectacles_ready_made", name:"Spectacles (Ready-Made)", price:1.5, invType:"Items", desc:"Wire frame" },
+        { id:"monocle_brass_rim", name:"Monocle (Brass Rim)", price:0.75, invType:"Items", desc:"With cord" },
+        { id:"magnifying_lens_pocket", name:"Magnifying Lens (Pocket)", price:0.5, invType:"Items", desc:"2 in glass" },
+        { id:"map_tube_pasteboard", name:"Map Tube (Pasteboard)", price:0.4, invType:"Items", desc:"Strap & caps" },
+        { id:"handkerchief_cotton", name:"Handkerchief (Cotton)", price:0.05, invType:"Items", desc:"Pack: 2" },
+        { id:"umbrella_whalebone_rib", name:"Umbrella (Whalebone Rib)", price:1.0, invType:"Items", desc:"Black cover" },
+        { id:"coin_purse_leather", name:"Coin Purse (Leather)", price:0.15, invType:"Items", desc:"Clasp top" },
+        { id:"walking_stick_hickory", name:"Walking Stick (Hickory)", price:0.5, invType:"Items", desc:"Ferrule tip" },
+        { id:"travel_blanket_wool", name:"Travel Blanket (Wool)", price:1.25, invType:"Items", desc:"Size: 60\\\"×72\\" },
+        { id:"dreamcatcher_ojibwe_style", name:"Dreamcatcher (Ojibwe Style)", price:0.6, invType:"Items", desc:"Ring: 5 in" },
+        { id:"letter_opener_steel", name:"Letter Opener (Steel)", price:0.1, invType:"Items", desc:"7 in" },
+        { id:"collapsible_drinking_cup", name:"Collapsible Drinking Cup", price:0.25, invType:"Items", desc:"Nickel-plated" },
+        { id:"carbon_paper_sheets", name:"Carbon Paper Sheets", price:0.2, invType:"Items", desc:"Pack: 12" },
+        { id:"concealed_cuff_knife", name:"Concealed Cuff Knife", price:1.0, invType:"Items", desc:"Blade: 1¾ in" },
+        { id:"ledger_cipher_wheel", name:"Ledger Cipher Wheel", price:0.75, invType:"Items", desc:"Brass dials" },
+        { id:"bird_seed", name:"Bird Seed", price:0.05, invType:"Items", desc:"Bag: 1 lb" },
+        { id:"bear_trap_no_3", name:"Bear Trap (No. 3)", price:3.0, invType:"Items", desc:"Jaw spread: 6½ in" },
+        { id:"fishing_rod_tackle_12_piece", name:"Fishing Rod & Tackle (12-Piece)", price:2.25, invType:"Items", desc:"Rod, line, 6 hooks, floats, sinkers, tin box" },
+        { id:"crab_trap_wire", name:"Crab Trap (Wire)", price:1.25, invType:"Items", desc:"Folded basket" },
+        { id:"net_casting", name:"Net (Casting)", price:0.5, invType:"Items", desc:"Diameter: 6 ft" },
+        { id:"trapping_kit_small_game", name:"Trapping Kit (Small Game)", price:2.5, invType:"Items", desc:"3 snares, 2 steel gins, stakes, line, skinning knife" },
+        { id:"sketching_kit_pocket", name:"Sketching Kit (Pocket)", price:0.75, invType:"Items", desc:"Graphite set, stump, 3×5 pad, board" },
+        { id:"artist_s_tools_travel", name:"Artist’s Tools (Travel)", price:2.0, invType:"Items", desc:"Brushes (4), palette, pigments (6), knife, roll" },
+        { id:"leatherworking_kit", name:"Leatherworking Kit", price:2.5, invType:"Items", desc:"Awl, overstitch wheel, needles, waxed thread, punches, dye" },
+        { id:"bookbinding_kit", name:"Bookbinding Kit", price:2.0, invType:"Items", desc:"Bone folder, needles, linen thread, paste, boards, cloth" },
+        { id:"whittling_knife_pen", name:"Whittling Knife (Pen)", price:0.25, invType:"Items", desc:"2-blade jack" },
+        { id:"coffee_mill_hand_crank", name:"Coffee Mill (Hand-Crank)", price:0.75, invType:"Items", desc:"Tin hopper" },
+        { id:"corked_vials_glass", name:"Corked Vials (Glass)", price:0.2, invType:"Items", desc:"Dozen" },
+        { id:"clothespins_wood", name:"Clothespins (Wood)", price:0.1, invType:"Items", desc:"Pack: 24" },
+        { id:"pocket_scissors", name:"Pocket Scissors", price:0.2, invType:"Items", desc:"3½ in" },
+        { id:"charcoal_drawing_sticks", name:"Charcoal (Drawing Sticks)", price:0.1, invType:"Items", desc:"Box: 12" },
+        { id:"camp_stove_folding_sheet_iron", name:"Camp Stove (Folding, Sheet Iron)", price:2.5, invType:"Items", desc:"Fuel: wood/coal" },
+        { id:"cooking_pans_nest_of_3", name:"Cooking Pans (Nest of 3)", price:0.9, invType:"Items", desc:"Skillet, saucepan, pot" },
+        { id:"tea_ball_infuser", name:"Tea Ball (Infuser)", price:0.1, invType:"Items", desc:"Mesh sphere" },
+        { id:"wax_tablet_stylus", name:"Wax Tablet & Stylus", price:0.25, invType:"Items", desc:"Pocket slate" },
+        { id:"ledger_book_ruled", name:"Ledger Book (Ruled)", price:0.4, invType:"Items", desc:"200 pages" },
+        { id:"red_blue_pencil_combo", name:"Red/Blue Pencil (Combo)", price:0.05, invType:"Items", desc:"Dual-end" },
+        { id:"draftsman_s_kit", name:"Draftsman’s Kit", price:3.0, invType:"Items", desc:"Rule, triangle, protractor, dividers, pencil, tin case" },
+        { id:"paint_brush_house", name:"Paint Brush (House)", price:0.1, invType:"Items", desc:"2 in bristle" },
+        { id:"horse_brush_dandy", name:"Horse Brush (Dandy)", price:0.2, invType:"Items", desc:"Natural fiber" },
+        { id:"paper_fans_folding", name:"Paper Fans (Folding)", price:0.1, invType:"Items", desc:"Set: 2" },
+        { id:"bag_of_hay", name:"Bag of Hay", price:0.15, invType:"Items", desc:"Weight: 5 lb" },
+        { id:"chewing_gum_adams_style", name:"Chewing Gum (Adams-Style)", price:0.05, invType:"Items", desc:"Pack: 5 sticks" },
+        { id:"saint_s_medallion_base_metal", name:"Saint’s Medallion (Base Metal)", price:0.25, invType:"Items", desc:"St. Christopher" },
+        { id:"talismanic_coin_pocket_charm", name:"Talismanic Coin (Pocket Charm)", price:0.15, invType:"Items", desc:"Etched brass" },
+        { id:"rat_trap_spring", name:"Rat Trap (Spring)", price:0.2, invType:"Items", desc:"Size: No. 1" },
+        { id:"bed_bug_powder", name:"Bed Bug Powder", price:0.1, invType:"Items", desc:"Tin: 4 oz" },
+      ],
+
+      "Food": [
+        { id:"hardtack_biscuits", name:"Hardtack Biscuits", price:0.08, invType:"Items", desc:"Quantity: 1 lb sack" },
+        { id:"salt_pork_sowbelly", name:"Salt Pork (Sowbelly)", price:0.12, invType:"Items", desc:"Quantity: 1 lb slab" },
+        { id:"beans_navy", name:"Beans (Navy)", price:0.05, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"cornmeal", name:"Cornmeal", price:0.15, invType:"Items", desc:"Quantity: 5 lb bag" },
+        { id:"rice", name:"Rice", price:0.05, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"potatoes", name:"Potatoes", price:0.25, invType:"Items", desc:"Quantity: 10 lb sack" },
+        { id:"onions", name:"Onions", price:0.1, invType:"Items", desc:"Quantity: 3 lb bag" },
+        { id:"coffee_ground", name:"Coffee (Ground)", price:0.12, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"coffee_unground_beans", name:"Coffee (Unground Beans)", price:0.12, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"chicory_root_roast_ground", name:"Chicory Root (Roast & Ground)", price:0.08, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"tea_loose_black", name:"Tea (Loose, Black)", price:0.5, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"tea_bricks", name:"Tea Bricks", price:0.3, invType:"Items", desc:"Quantity: 1 lb brick" },
+        { id:"sugar_brown", name:"Sugar (Brown)", price:0.08, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"molasses", name:"Molasses", price:0.15, invType:"Items", desc:"Quantity: 1 qt jug" },
+        { id:"honey", name:"Honey", price:0.15, invType:"Items", desc:"Quantity: 1 lb jar" },
+        { id:"spice_kit_trail", name:"Spice Kit (Trail)", price:0.25, invType:"Items", desc:"Quantity: tin (salt, pepper, mustard, cinnamon, cloves)" },
+        { id:"assorted_dried_fruits", name:"Assorted Dried Fruits", price:0.15, invType:"Items", desc:"Quantity: 1 lb mix" },
+        { id:"pickles_cucumber", name:"Pickles (Cucumber)", price:0.1, invType:"Items", desc:"Quantity: 1 qt jar" },
+        { id:"chocolate_baking", name:"Chocolate (Baking)", price:0.25, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"chocolate_bar_sweet", name:"Chocolate Bar (Sweet)", price:0.05, invType:"Items", desc:"Quantity: 2 oz" },
+        { id:"rock_candy", name:"Rock Candy", price:0.15, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"licorice_black", name:"Licorice (Black)", price:0.08, invType:"Items", desc:"Quantity: 4 oz packet" },
+        { id:"licorice_root_chew", name:"Licorice Root (Chew)", price:0.03, invType:"Items", desc:"Quantity: 1 oz" },
+        { id:"maple_sugar_cakes", name:"Maple Sugar Cakes", price:0.16, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"ginger_snaps", name:"Ginger Snaps", price:0.1, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"jerky_beef", name:"Jerky (Beef)", price:0.25, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"venison_jerky", name:"Venison Jerky", price:0.3, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"smoked_salmon", name:"Smoked Salmon", price:0.3, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"sardines_in_oil", name:"Sardines (In Oil)", price:0.1, invType:"Items", desc:"Quantity: 1 tin" },
+        { id:"salted_fish_cod_catfish", name:"Salted Fish (Cod/Catfish)", price:0.12, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"salted_beef_tongue", name:"Salted Beef Tongue", price:0.2, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"dried_shrimp_imported", name:"Dried Shrimp (Imported)", price:0.3, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"goat_jerky", name:"Goat Jerky", price:0.3, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"wild_rice", name:"Wild Rice", price:0.15, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"dried_seaweed", name:"Dried Seaweed", price:0.1, invType:"Items", desc:"Quantity: 4 oz sheets" },
+        { id:"collard_greens", name:"Collard Greens", price:0.05, invType:"Items", desc:"Quantity: 1 bunch" },
+        { id:"olive_oil", name:"Olive Oil", price:0.4, invType:"Items", desc:"Quantity: 1 pint bottle" },
+        { id:"soy_sauce_imported", name:"Soy Sauce (Imported)", price:0.25, invType:"Items", desc:"Quantity: 12 oz bottle" },
+        { id:"ginger_root_fresh", name:"Ginger Root (Fresh)", price:0.12, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"chili_paste_jar", name:"Chili Paste (Jar)", price:0.2, invType:"Items", desc:"Quantity: 8 oz" },
+        { id:"preserved_plums_chinese", name:"Preserved Plums (Chinese)", price:0.25, invType:"Items", desc:"Quantity: 1 jar" },
+        { id:"candied_ginger", name:"Candied Ginger", price:0.1, invType:"Items", desc:"Quantity: 4 oz" },
+        { id:"mesquite_pods_dried", name:"Mesquite Pods (Dried)", price:0.05, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"prickly_pear_pads_nopales", name:"Prickly Pear Pads (Nopales)", price:0.05, invType:"Items", desc:"Quantity: 2 pads" },
+        { id:"pemmican", name:"Pemmican", price:0.3, invType:"Items", desc:"Quantity: 1 lb bag" },
+        { id:"barley_pearled", name:"Barley (Pearled)", price:0.04, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"canned_tomatoes", name:"Canned Tomatoes", price:0.1, invType:"Items", desc:"Quantity: 1 tin" },
+        { id:"corn_on_the_cob_fresh", name:"Corn on the Cob (Fresh)", price:0.2, invType:"Items", desc:"Quantity: dozen ears" },
+        { id:"tortillas_corn", name:"Tortillas (Corn)", price:0.1, invType:"Items", desc:"Quantity: dozen" },
+        { id:"hominy_grits", name:"Hominy Grits", price:0.04, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"dried_chorizo_sausage", name:"Dried Chorizo Sausage", price:0.25, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"shaoxing_wine_rice", name:"Shaoxing Wine (Rice)", price:0.6, invType:"Items", desc:"Quantity: 750 ml bottle" },
+        { id:"douchi_fermented_black_beans", name:"Douchi (Fermented Black Beans)", price:0.15, invType:"Items", desc:"Quantity: 8 oz" },
+        { id:"okra_fresh", name:"Okra (Fresh)", price:0.05, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"pickled_okra", name:"Pickled Okra", price:0.1, invType:"Items", desc:"Quantity: 1 pt jar" },
+        { id:"pickled_eggs", name:"Pickled Eggs", price:0.2, invType:"Items", desc:"Quantity: dozen (jar)" },
+        { id:"coffee_substitute_mix", name:"Coffee Substitute Mix", price:0.08, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"mushroom_ketchup", name:"Mushroom Ketchup", price:0.2, invType:"Items", desc:"Quantity: 6 oz bottle" },
+        { id:"acorn_meal", name:"Acorn Meal", price:0.05, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"buffalo_meat_fresh", name:"Buffalo Meat (Fresh)", price:0.12, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"raw_chicken_dressed", name:"Raw Chicken (Dressed)", price:0.1, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"raw_beef_round", name:"Raw Beef (Round)", price:0.1, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"assorted_berries_fresh", name:"Assorted Berries (Fresh)", price:0.1, invType:"Items", desc:"Quantity: 1 qt" },
+        { id:"cactus_fruit_prickly_pear", name:"Cactus Fruit (Prickly Pear)", price:0.06, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"bamboo_shoots_tinned", name:"Bamboo Shoots (Tinned)", price:0.15, invType:"Items", desc:"Quantity: 1 tin" },
+        { id:"salt", name:"Salt", price:0.5, invType:"Items", desc:"Quantity: 25 lb sack" },
+        { id:"canned_soup", name:"Canned Soup", price:0.1, invType:"Items", desc:"Quantity: 1 tin" },
+        { id:"canned_oysters", name:"Canned Oysters", price:0.25, invType:"Items", desc:"Quantity: 1 tin" },
+        { id:"sorghum_syrup", name:"Sorghum Syrup", price:0.2, invType:"Items", desc:"Quantity: 1 qt" },
+        { id:"applejack", name:"Applejack", price:0.5, invType:"Items", desc:"Quantity: 1 pint" },
+        { id:"salted_mutton", name:"Salted Mutton", price:0.12, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"smoked_eel", name:"Smoked Eel", price:0.25, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"plantains_fresh", name:"Plantains (Fresh)", price:0.3, invType:"Items", desc:"Quantity: dozen" },
+        { id:"chili_chocolate_drink_mix", name:"Chili Chocolate Drink Mix", price:0.2, invType:"Items", desc:"Quantity: 8 oz" },
+        { id:"snake_jerky_rattler", name:"Snake Jerky (Rattler)", price:0.4, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"rattlesnake_meat_fresh", name:"Rattlesnake Meat (Fresh)", price:0.3, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"cabbage_green", name:"Cabbage (Green)", price:0.05, invType:"Items", desc:"Quantity: 1 head" },
+        { id:"sorghum_molasses_cookies", name:"Sorghum Molasses Cookies", price:0.1, invType:"Items", desc:"Quantity: dozen" },
+        { id:"crawfish_fresh", name:"Crawfish (Fresh)", price:0.2, invType:"Items", desc:"Quantity: dozen" },
+        { id:"horse_meat", name:"Horse Meat", price:0.08, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"health_vinegar_tonic", name:"Health Vinegar Tonic", price:0.25, invType:"Items", desc:"Quantity: 12 oz bottle" },
+        { id:"toasted_crickets", name:"Toasted Crickets", price:0.08, invType:"Items", desc:"Quantity: 4 oz" },
+        { id:"lentils_dry", name:"Lentils (Dry)", price:0.06, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"jerusalem_artichokes", name:"Jerusalem Artichokes", price:0.03, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"pickled_pigs_feet", name:"Pickled Pigs’ Feet", price:0.2, invType:"Items", desc:"Quantity: 1 qt jar" },
+        { id:"blood_sausage", name:"Blood Sausage", price:0.15, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"millet", name:"Millet", price:0.04, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"yerba_mate", name:"Yerba Mate", price:0.25, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"sarsaparilla_beverage", name:"Sarsaparilla (Beverage)", price:0.1, invType:"Items", desc:"Quantity: 12 oz bottle" },
+        { id:"hot_chocolate_mix", name:"Hot Chocolate Mix", price:0.2, invType:"Items", desc:"Quantity: 8 oz" },
+        { id:"wild_herbs_mix", name:"Wild Herbs Mix", price:0.05, invType:"Items", desc:"Quantity: 1 bundle" },
+        { id:"sorrel_drink", name:"Sorrel Drink", price:0.1, invType:"Items", desc:"Quantity: 12 oz bottle" },
+        { id:"gelatin_sheets", name:"Gelatin (Sheets)", price:0.05, invType:"Items", desc:"Quantity: 1 oz" },
+        { id:"tamarind_pods_dried", name:"Tamarind Pods (Dried)", price:0.1, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"sauerkraut", name:"Sauerkraut", price:0.1, invType:"Items", desc:"Quantity: 1 qt crock" },
+        { id:"corn_dodger_cakes", name:"Corn Dodger Cakes", price:0.12, invType:"Items", desc:"Quantity: dozen" },
+        { id:"pulque_agave_brew", name:"Pulque (Agave Brew)", price:0.25, invType:"Items", desc:"Quantity: 1 liter jar" },
+        { id:"frybread", name:"Frybread", price:0.15, invType:"Items", desc:"Quantity: dozen" },
+        { id:"maguey_worms_edible", name:"Maguey Worms (Edible)", price:0.2, invType:"Items", desc:"Quantity: 4 oz" },
+        { id:"head_cheese", name:"Head Cheese", price:0.12, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"smoked_beaver_tail", name:"Smoked Beaver Tail", price:0.25, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"preserved_duck_eggs", name:"Preserved Duck Eggs", price:0.2, invType:"Items", desc:"Quantity: half-dozen" },
+        { id:"blood_soup_quart", name:"Blood Soup (Quart)", price:0.2, invType:"Items", desc:"Quantity: 1 qt jar" },
+        { id:"macaroni", name:"Macaroni", price:0.1, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"oatmeal_rolled", name:"Oatmeal (Rolled)", price:0.04, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"crackers_soda", name:"Crackers (Soda)", price:0.08, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"bear_fat_rendered", name:"Bear Fat (Rendered)", price:0.15, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"pepitas_roasted_pumpkin_seeds", name:"Pepitas (Roasted Pumpkin Seeds)", price:0.1, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"isinglass_finings", name:"Isinglass (Finings)", price:0.2, invType:"Items", desc:"Quantity: 4 oz" },
+        { id:"beef_tea_concentrate", name:"Beef Tea Concentrate", price:0.25, invType:"Items", desc:"Quantity: 8 oz jar" },
+        { id:"peppermint_sticks", name:"Peppermint Sticks", price:0.1, invType:"Items", desc:"Quantity: dozen" },
+        { id:"peanut_brittle", name:"Peanut Brittle", price:0.12, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"candied_citrus_peel", name:"Candied Citrus Peel", price:0.1, invType:"Items", desc:"Quantity: 4 oz" },
+        { id:"sassafras_lozenges", name:"Sassafras Lozenges", price:0.1, invType:"Items", desc:"Quantity: 2 oz tin" },
+        { id:"johnny_cake_mix", name:"Johnny Cake Mix", price:0.05, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"rye_bread_loaf", name:"Rye Bread (Loaf)", price:0.05, invType:"Items", desc:"Quantity: 1 loaf" },
+        { id:"crullers", name:"Crullers", price:0.12, invType:"Items", desc:"Quantity: dozen" },
+        { id:"lemonade_powder", name:"Lemonade Powder", price:0.1, invType:"Items", desc:"Quantity: 4 oz tin" },
+        { id:"switchel_haymaker_s_punch", name:"Switchel (Haymaker’s Punch)", price:0.1, invType:"Items", desc:"Quantity: 12 oz bottle" },
+        { id:"tamarind_drink", name:"Tamarind Drink", price:0.12, invType:"Items", desc:"Quantity: 12 oz bottle" },
+        { id:"root_beer", name:"Root Beer", price:0.1, invType:"Items", desc:"Quantity: 12 oz bottle" },
+        { id:"gelatin_desserts_powder", name:"Gelatin Desserts (Powder)", price:0.12, invType:"Items", desc:"Quantity: 4 oz" },
+        { id:"powdered_custard", name:"Powdered Custard", price:0.12, invType:"Items", desc:"Quantity: 4 oz" },
+        { id:"coffee_syrup", name:"Coffee Syrup", price:0.15, invType:"Items", desc:"Quantity: 8 oz bottle" },
+        { id:"malt_extract_liquid", name:"Malt Extract (Liquid)", price:0.2, invType:"Items", desc:"Quantity: 12 oz bottle" },
+        { id:"black_eyed_peas_dry", name:"Black-Eyed Peas (Dry)", price:0.05, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"molokhia_dried_jute_leaves", name:"Molokhia (Dried Jute Leaves)", price:0.1, invType:"Items", desc:"Quantity: 4 oz" },
+        { id:"cajeta_goat_s_milk_caramel", name:"Cajeta (Goat’s Milk Caramel)", price:0.25, invType:"Items", desc:"Quantity: 8 oz jar" },
+        { id:"tepache_pineapple_ferment", name:"Tepache (Pineapple Ferment)", price:0.12, invType:"Items", desc:"Quantity: 12 oz bottle" },
+        { id:"chokecherry_cakes_pounded", name:"Chokecherry Cakes (Pounded)", price:0.15, invType:"Items", desc:"Quantity: 8 oz" },
+        { id:"grits_coarse", name:"Grits (Coarse)", price:0.04, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"cream_drops", name:"Cream Drops", price:0.12, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"lemon_drops", name:"Lemon Drops", price:0.12, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"roasted_chickpeas", name:"Roasted Chickpeas", price:0.08, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"parched_corn", name:"Parched Corn", price:0.06, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"popcorn_balls", name:"Popcorn Balls", price:0.1, invType:"Items", desc:"Quantity: dozen" },
+        { id:"gingerbread_squares", name:"Gingerbread Squares", price:0.12, invType:"Items", desc:"Quantity: dozen" },
+        { id:"malted_milk_powder", name:"Malted Milk Powder", price:0.2, invType:"Items", desc:"Quantity: 8 oz tin" },
+        { id:"dandelion_burdock", name:"Dandelion & Burdock", price:0.1, invType:"Items", desc:"Quantity: 12 oz bottle" },
+        { id:"fruit_shrubs_syrup", name:"Fruit Shrubs (Syrup)", price:0.2, invType:"Items", desc:"Quantity: 12 oz bottle" },
+        { id:"hot_cross_buns", name:"Hot Cross Buns", price:0.12, invType:"Items", desc:"Quantity: dozen" },
+        { id:"hush_puppies", name:"Hush Puppies", price:0.1, invType:"Items", desc:"Quantity: dozen" },
+        { id:"anise_seed_cookies", name:"Anise Seed Cookies", price:0.12, invType:"Items", desc:"Quantity: dozen" },
+        { id:"flour_sack", name:"Flour (Sack)", price:2.0, invType:"Items", desc:"Quantity: 50 lb" },
+        { id:"butter_salted", name:"Butter (Salted)", price:0.15, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"lard", name:"Lard", price:0.06, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"cheddar_cheese", name:"Cheddar Cheese", price:0.05, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"egg_powder_dried", name:"Egg Powder (Dried)", price:0.3, invType:"Items", desc:"Quantity: 8 oz tin" },
+        { id:"evaporated_milk", name:"Evaporated Milk", price:0.12, invType:"Items", desc:"Quantity: 14 oz can" },
+        { id:"milk_fresh", name:"Milk (Fresh)", price:0.05, invType:"Items", desc:"Quantity: 1 qt" },
+        { id:"cider_apple", name:"Cider (Apple)", price:0.1, invType:"Items", desc:"Quantity: 1 qt" },
+        { id:"mustard_powder", name:"Mustard Powder", price:0.1, invType:"Items", desc:"Quantity: 2 oz tin" },
+        { id:"peas_dry", name:"Peas (Dry)", price:0.05, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"peppermints_sticks", name:"Peppermints (Sticks)", price:0.1, invType:"Items", desc:"Quantity: dozen" },
+        { id:"chili_peppers_dried", name:"Chili Peppers (Dried)", price:0.3, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"sassafras_root", name:"Sassafras Root", price:0.1, invType:"Items", desc:"Quantity: 1 lb" },
+        { id:"turnips", name:"Turnips", price:0.1, invType:"Items", desc:"Quantity: 5 lb sack" },
+        { id:"salted_anchovies", name:"Salted Anchovies", price:0.25, invType:"Items", desc:"Quantity: 1 jar" },
+      ],
+
+      "Alcohol": [
+        { id:"porter", name:"Porter", price:0.05, invType:"Items", desc:"Quantity: 1 pint glass" },
+        { id:"lager_beer_local", name:"Lager Beer (Local)", price:0.05, invType:"Items", desc:"Quantity: 1 pint glass" },
+        { id:"steam_beer_california_common", name:"Steam Beer (California Common)", price:0.05, invType:"Items", desc:"Quantity: 1 pint glass" },
+        { id:"pale_ale", name:"Pale Ale", price:0.05, invType:"Items", desc:"Quantity: 1 pint glass" },
+        { id:"bitter_ale", name:"Bitter Ale", price:0.05, invType:"Items", desc:"Quantity: 1 pint glass" },
+        { id:"stout", name:"Stout", price:0.05, invType:"Items", desc:"Quantity: 1 pint glass" },
+        { id:"pilsner_imported", name:"Pilsner (Imported)", price:0.15, invType:"Items", desc:"Quantity: 12 oz bottle" },
+        { id:"small_beer", name:"Small Beer", price:0.03, invType:"Items", desc:"Quantity: 1 pint glass" },
+        { id:"near_beer", name:"Near Beer", price:0.05, invType:"Items", desc:"Quantity: 12 oz bottle" },
+        { id:"sarsaparilla_beer", name:"Sarsaparilla Beer", price:0.1, invType:"Items", desc:"Quantity: 12 oz bottle" },
+        { id:"ginger_beer", name:"Ginger Beer", price:0.1, invType:"Items", desc:"Quantity: 12 oz bottle" },
+        { id:"spruce_beer", name:"Spruce Beer", price:0.1, invType:"Items", desc:"Quantity: 12 oz bottle" },
+        { id:"cider_hard", name:"Cider (Hard)", price:0.05, invType:"Items", desc:"Quantity: 1 pint mug" },
+        { id:"mulled_ale", name:"Mulled Ale", price:0.1, invType:"Items", desc:"Quantity: 12 oz hot mug" },
+        { id:"mulled_wine", name:"Mulled Wine", price:0.1, invType:"Items", desc:"Quantity: 8 oz hot mug" },
+        { id:"table_wine_house", name:"Table Wine (House)", price:0.2, invType:"Items", desc:"Quantity: 750 ml bottle" },
+        { id:"claret_cheap_red_wine", name:"Claret (Cheap Red Wine)", price:0.25, invType:"Items", desc:"Quantity: 750 ml bottle" },
+        { id:"port_wine", name:"Port Wine", price:0.75, invType:"Items", desc:"Quantity: 750 ml bottle" },
+        { id:"sherry_wine", name:"Sherry Wine", price:0.75, invType:"Items", desc:"Quantity: 750 ml bottle" },
+        { id:"madeira", name:"Madeira", price:1.0, invType:"Items", desc:"Quantity: 750 ml bottle" },
+        { id:"sauternes", name:"Sauternes", price:1.25, invType:"Items", desc:"Quantity: 750 ml bottle" },
+        { id:"champagne", name:"Champagne", price:1.75, invType:"Items", desc:"Quantity: 750 ml bottle" },
+        { id:"fake_champagne", name:"Fake Champagne", price:0.75, invType:"Items", desc:"Quantity: 750 ml bottle" },
+        { id:"vermouth_sweet", name:"Vermouth (Sweet)", price:0.75, invType:"Items", desc:"Quantity: 750 ml bottle" },
+        { id:"whiskey_frontier_blend", name:"Whiskey (Frontier Blend)", price:0.75, invType:"Items", desc:"Quantity: 1 quart bottle" },
+        { id:"rotgut_whiskey_aka_rogut", name:"Rotgut Whiskey (aka “Rogut”)", price:0.5, invType:"Items", desc:"Quantity: 1 quart bottle" },
+        { id:"forty_rod", name:"Forty-Rod", price:0.6, invType:"Items", desc:"Quantity: 1 quart bottle" },
+        { id:"busthead", name:"Busthead", price:0.6, invType:"Items", desc:"Quantity: 1 quart bottle" },
+        { id:"snakebite_whiskey_peppered", name:"Snakebite Whiskey (Peppered)", price:1.1, invType:"Items", desc:"Quantity: 1 quart bottle" },
+        { id:"white_lightning", name:"White Lightning", price:1.0, invType:"Items", desc:"Quantity: 1 quart bottle" },
+        { id:"moonshine_illicit", name:"Moonshine (Illicit)", price:0.5, invType:"Items", desc:"Quantity: 1 pint flask" },
+        { id:"coffin_varnish", name:"Coffin Varnish", price:0.4, invType:"Items", desc:"Quantity: 1 quart bottle" },
+        { id:"kentucky_bourbon", name:"Kentucky Bourbon", price:1.5, invType:"Items", desc:"Quantity: 1 quart bottle" },
+        { id:"rye_whiskey", name:"Rye Whiskey", price:1.25, invType:"Items", desc:"Quantity: 1 quart bottle" },
+        { id:"tennessee_whiskey_sour_mash", name:"Tennessee Whiskey (Sour Mash)", price:1.5, invType:"Items", desc:"Quantity: 1 quart bottle" },
+        { id:"canadian_whisky", name:"Canadian Whisky", price:1.2, invType:"Items", desc:"Quantity: 1 quart bottle" },
+        { id:"irish_whiskey", name:"Irish Whiskey", price:2.0, invType:"Items", desc:"Quantity: 1 quart bottle" },
+        { id:"scotch_whisky_highland", name:"Scotch Whisky (Highland)", price:2.5, invType:"Items", desc:"Quantity: 1 quart bottle" },
+        { id:"corn_liquor_legal", name:"Corn Liquor (Legal)", price:0.8, invType:"Items", desc:"Quantity: 1 quart bottle" },
+        { id:"applejack_2", name:"Applejack", price:1.0, invType:"Items", desc:"Quantity: 1 quart bottle" },
+        { id:"peach_brandy", name:"Peach Brandy", price:1.25, invType:"Items", desc:"Quantity: 1 quart bottle" },
+        { id:"brandy_cognac_style", name:"Brandy (Cognac Style)", price:1.75, invType:"Items", desc:"Quantity: 1 quart bottle" },
+        { id:"rum_caribbean", name:"Rum (Caribbean)", price:1.25, invType:"Items", desc:"Quantity: 1 quart bottle" },
+        { id:"gin_london_dry", name:"Gin (London Dry)", price:1.25, invType:"Items", desc:"Quantity: 1 quart bottle" },
+        { id:"tequila_jalisco", name:"Tequila (Jalisco)", price:1.5, invType:"Items", desc:"Quantity: 1 quart bottle" },
+        { id:"mezcal_oaxacan", name:"Mezcal (Oaxacan)", price:1.25, invType:"Items", desc:"Quantity: 1 quart bottle" },
+        { id:"cachaça_brazilian", name:"Cachaça (Brazilian)", price:1.0, invType:"Items", desc:"Quantity: 1 quart bottle" },
+        { id:"aquavit", name:"Aquavit", price:1.5, invType:"Items", desc:"Quantity: 750 ml bottle" },
+        { id:"kirschwasser", name:"Kirschwasser", price:1.5, invType:"Items", desc:"Quantity: 750 ml bottle" },
+        { id:"pisco", name:"Pisco", price:1.25, invType:"Items", desc:"Quantity: 1 quart bottle" },
+        { id:"grappa", name:"Grappa", price:1.25, invType:"Items", desc:"Quantity: 750 ml bottle" },
+        { id:"schnapps_fruit", name:"Schnapps (Fruit)", price:1.0, invType:"Items", desc:"Quantity: 750 ml bottle" },
+        { id:"anisette", name:"Anisette", price:1.5, invType:"Items", desc:"Quantity: 750 ml bottle" },
+        { id:"kümmel", name:"Kümmel", price:1.5, invType:"Items", desc:"Quantity: 750 ml bottle" },
+        { id:"benedictine", name:"Benedictine", price:2.5, invType:"Items", desc:"Quantity: 750 ml bottle" },
+        { id:"chartreuse", name:"Chartreuse", price:3.0, invType:"Items", desc:"Quantity: 750 ml bottle" },
+        { id:"absinthe_imported", name:"Absinthe (Imported)", price:3.0, invType:"Items", desc:"Quantity: 750 ml bottle" },
+        { id:"vermouth_dry", name:"Vermouth (Dry)", price:0.75, invType:"Items", desc:"Quantity: 750 ml bottle" },
+        { id:"pilsner_bohemian", name:"Pilsner (Bohemian)", price:0.15, invType:"Items", desc:"Quantity: 12 oz bottle" },
+        { id:"rice_beer_imported", name:"Rice Beer (Imported)", price:0.25, invType:"Items", desc:"Quantity: 12 oz bottle" },
+        { id:"valley_tan_territorial_whiskey", name:"Valley Tan (Territorial Whiskey)", price:1.0, invType:"Items", desc:"Quantity: 1 quart bottle" },
+        { id:"tesguino_corn_beer", name:"Tesguino (Corn Beer)", price:0.05, invType:"Items", desc:"Quantity: 1 pint gourd" },
+        { id:"tiswin_corn_saguaro_brew", name:"Tiswin (Corn/Saguaro Brew)", price:0.05, invType:"Items", desc:"Quantity: 1 pint gourd" },
+        { id:"pine_nut_beer", name:"Pine-Nut Beer", price:0.05, invType:"Items", desc:"Quantity: 1 pint mug" },
+        { id:"pulque_agave_sap", name:"Pulque (Agave Sap)", price:0.25, invType:"Items", desc:"Quantity: 1 liter jar" },
+        { id:"canadian_whisky_montreal_blend", name:"Canadian Whisky (Montreal Blend)", price:1.2, invType:"Items", desc:"Quantity: 1 quart bottle" },
+        { id:"irish_whiskey_dublin_malt", name:"Irish Whiskey (Dublin Malt)", price:2.0, invType:"Items", desc:"Quantity: 1 quart bottle" },
+        { id:"scotch_whisky_blended", name:"Scotch Whisky (Blended)", price:2.25, invType:"Items", desc:"Quantity: 1 quart bottle" },
+      ],
+
+      "Watches": [
+        { id:"witching_hour_watch", name:"Witching-Hour Watch", price:45.0, invType:"Items", desc:"Type: Pocket Watch | Material: Blued steel hands, black enamel dial | Quantity: 1" },
+        { id:"spirit_pendulum_watch", name:"Spirit-Pendulum Watch", price:38.0, invType:"Items", desc:"Type: Pocket Watch | Material: Nickel case, crystal | Quantity: 1" },
+        { id:"tin_pocket_watch", name:"Tin Pocket Watch", price:1.25, invType:"Items", desc:"Type: Pocket Watch | Material: Tinned brass case, key-wind | Quantity: 1" },
+        { id:"nickel_plated_pocket_watch", name:"Nickel-Plated Pocket Watch", price:3.5, invType:"Items", desc:"Type: Pocket Watch | Material: Nickel case, key-wind | Quantity: 1" },
+        { id:"silver_open_face_watch", name:"Silver Open-Face Watch", price:12.0, invType:"Items", desc:"Type: Pocket Watch | Material: Coin silver case, 7-jewel lever | Quantity: 1" },
+        { id:"hunter_s_case_pocket_watch", name:"Hunter’s Case Pocket Watch", price:16.0, invType:"Items", desc:"Type: Pocket Watch | Material: Coin silver lid, 11-jewel | Quantity: 1" },
+        { id:"railroad_standard_watch", name:"Railroad Standard Watch", price:28.0, invType:"Items", desc:"Type: Pocket Watch | Material: Nickel case, lever-set, 17-jewel | Quantity: 1" },
+        { id:"railroad_regulator_watch", name:"Railroad Regulator Watch", price:32.0, invType:"Items", desc:"Type: Pocket Watch | Material: Nickel/silver case, adjusted | Quantity: 1" },
+        { id:"ladies_chatelaine_watch", name:"Ladies’ Chatelaine Watch", price:14.0, invType:"Items", desc:"Type: Pendant/Chatelaine | Material: Silver, enamel cartouche | Quantity: 1" },
+        { id:"enamel_faced_ladies_watch", name:"Enamel-Faced Ladies’ Watch", price:18.0, invType:"Items", desc:"Type: Pendant Watch | Material: Gilt case, painted dial | Quantity: 1" },
+        { id:"gold_repeater_watch", name:"Gold Repeater Watch", price:110.0, invType:"Items", desc:"Type: Pocket Watch (Repeater) | Material: 14k gold case | Quantity: 1" },
+        { id:"jeweled_movement_watch", name:"Jeweled Movement Watch", price:22.0, invType:"Items", desc:"Type: Pocket Watch | Material: Nickel case, 15-jewel | Quantity: 1" },
+        { id:"swiss_imported_chronometer", name:"Swiss Imported Chronometer", price:85.0, invType:"Items", desc:"Type: Pocket Watch | Material: Gold-filled, adjusted | Quantity: 1" },
+        { id:"skeleton_watch_open_movement", name:"Skeleton Watch (Open Movement)", price:24.0, invType:"Items", desc:"Type: Pocket Watch | Material: Glass back, nickel works | Quantity: 1" },
+        { id:"coin_case_watch", name:"Coin-Case Watch", price:14.0, invType:"Items", desc:"Type: Disguise Watch | Material: Silver dollar shell | Quantity: 1" },
+        { id:"compass_watch_combination", name:"Compass & Watch Combination", price:16.0, invType:"Items", desc:"Type: Pocket Watch | Material: Brass case, inset compass | Quantity: 1" },
+        { id:"doctor_s_watch", name:"Doctor’s Watch", price:15.0, invType:"Items", desc:"Type: Pocket Watch | Material: Nickel case, large seconds | Quantity: 1" },
+        { id:"musical_watch", name:"Musical Watch", price:48.0, invType:"Items", desc:"Type: Novelty Pocket Watch | Material: Gilt case, tune mechanism | Quantity: 1" },
+        { id:"fusee_chain_watch", name:"Fusee Chain Watch", price:28.0, invType:"Items", desc:"Type: Pocket Watch | Material: English gilt, fusee drive | Quantity: 1" },
+        { id:"quarter_hour_repeater", name:"Quarter-Hour Repeater", price:85.0, invType:"Items", desc:"Type: Pocket Watch | Material: Gold-filled | Quantity: 1" },
+        { id:"moon_phase_watch", name:"Moon Phase Watch", price:36.0, invType:"Items", desc:"Type: Pocket Watch | Material: Silver case, enamel disc | Quantity: 1" },
+        { id:"calendar_watch", name:"Calendar Watch", price:29.0, invType:"Items", desc:"Type: Pocket Watch | Material: Nickel case, date aperture | Quantity: 1" },
+        { id:"enamel_scene_watch", name:"Enamel-Scene Watch", price:32.0, invType:"Items", desc:"Type: Pocket Watch | Material: Gilt case, painted lid | Quantity: 1" },
+        { id:"civil_war_presentation_watch", name:"Civil War Presentation Watch", price:38.0, invType:"Items", desc:"Type: Pocket Watch | Material: Coin silver, engraved | Quantity: 1" },
+        { id:"presentation_watch", name:"Presentation Watch", price:95.0, invType:"Items", desc:"Type: Pocket Watch | Material: 14k gold, inscription plate | Quantity: 1" },
+        { id:"gilt_case_watch", name:"Gilt-Case Watch", price:10.0, invType:"Items", desc:"Type: Pocket Watch | Material: Gilt brass, 7-jewel | Quantity: 1" },
+        { id:"diamond_studded_gold_watch", name:"Diamond-Studded Gold Watch", price:175.0, invType:"Items", desc:"Type: Pocket Watch | Material: 14k gold, diamond accents | Quantity: 1" },
+        { id:"ghost_tick_watch", name:"Ghost-Tick Watch", price:62.0, invType:"Items", desc:"Type: Pocket Watch | Material: Blackened silver, silent train | Quantity: 1" },
+        { id:"eclipse_watch", name:"Eclipse Watch", price:58.0, invType:"Items", desc:"Type: Pocket Watch | Material: Gunmetal case, sun-moon dial | Quantity: 1" },
+        { id:"phantom_repeater", name:"Phantom Repeater", price:95.0, invType:"Items", desc:"Type: Pocket Watch (Repeater) | Material: Oxidized silver | Quantity: 1" },
+        { id:"undertaker_s_regulator", name:"Undertaker’s Regulator", price:54.0, invType:"Items", desc:"Type: Pocket Watch | Material: Jet-inlaid case | Quantity: 1" },
+        { id:"timepiece_of_the_hanging_judge", name:"Timepiece of the Hanging Judge", price:70.0, invType:"Items", desc:"Type: Pocket Watch | Material: Blackened steel | Quantity: 1" },
+        { id:"devil_s_bargain_watch", name:"Devil’s Bargain Watch", price:80.0, invType:"Items", desc:"Type: Pocket Watch | Material: Red-gold plate | Quantity: 1" },
+        { id:"snake_eye_hunter_case", name:"Snake-Eye Hunter Case", price:68.0, invType:"Items", desc:"Type: Pocket Watch | Material: Gold-filled, garnet “eyes” | Quantity: 1" },
+        { id:"busted_watch_salvage", name:"Busted Watch (Salvage)", price:0.5, invType:"Items", desc:"Type: Pocket Watch (Broken) | Material: Mixed | Quantity: 1" },
+        { id:"silver_cross_pendant", name:"Silver Cross Pendant", price:0.85, invType:"Items", desc:"Type: Necklace | Material: Coin silver | Quantity: 1" },
+        { id:"copper_locket", name:"Copper Locket", price:0.4, invType:"Items", desc:"Type: Necklace | Material: Copper, glass windows | Quantity: 1" },
+        { id:"turquoise_bead_bracelet", name:"Turquoise Bead Bracelet", price:1.25, invType:"Items", desc:"Type: Bracelet | Material: Turquoise, sinew/cord | Quantity: 1" },
+        { id:"bone_carved_brooch", name:"Bone Carved Brooch", price:0.3, invType:"Items", desc:"Type: Brooch | Material: Carved bone, pin back | Quantity: 1" },
+        { id:"tin_cameo_pin", name:"Tin Cameo Pin", price:0.08, invType:"Items", desc:"Type: Brooch | Material: Pressed tin, paint | Quantity: 1" },
+        { id:"hairwork_ring", name:"Hairwork Ring", price:3.5, invType:"Items", desc:"Type: Ring | Material: Gold bezel, woven hair under crystal | Quantity: 1" },
+        { id:"gold_wedding_band", name:"Gold Wedding Band", price:4.75, invType:"Items", desc:"Type: Ring | Material: 10k gold | Quantity: 1" },
+        { id:"silver_pocket_watch_chain_t_bar", name:"Silver Pocket Watch Chain (T-Bar)", price:1.1, invType:"Items", desc:"Type: Chain | Material: Coin silver | Quantity: 1" },
+        { id:"engraved_belt_buckle_silver", name:"Engraved Belt Buckle (Silver)", price:3.0, invType:"Items", desc:"Type: Buckle | Material: Coin silver | Quantity: 1" },
+        { id:"pearl_earrings", name:"Pearl Earrings", price:2.25, invType:"Items", desc:"Type: Earrings (Pair) | Material: Seed pearls, gold hooks | Quantity: 1" },
+        { id:"ivory_brooch", name:"Ivory Brooch", price:1.75, invType:"Items", desc:"Type: Brooch | Material: Carved ivory, silver pin | Quantity: 1" },
+        { id:"mexican_peso_coin_pendant", name:"Mexican Peso Coin Pendant", price:0.65, invType:"Items", desc:"Type: Necklace | Material: Silver coin, drilled | Quantity: 1" },
+        { id:"gold_pocket_watch_with_chain", name:"Gold Pocket Watch (with Chain)", price:125.0, invType:"Items", desc:"Type: Watch + Chain | Material: 14k case, rolled-gold chain | Quantity: 1" },
+        { id:"jeweled_stickpin", name:"Jeweled Stickpin", price:2.5, invType:"Items", desc:"Type: Stickpin | Material: Gold, garnet or ruby | Quantity: 1" },
+        { id:"cameo_choker", name:"Cameo Choker", price:1.8, invType:"Items", desc:"Type: Necklace | Material: Shell cameo, velvet band | Quantity: 1" },
+        { id:"diamond_solitaire_ring", name:"Diamond Solitaire Ring", price:185.0, invType:"Items", desc:"Type: Ring | Material: 14k gold, old-mine-cut diamond | Quantity: 1" },
+        { id:"emerald_pendant_necklace", name:"Emerald Pendant Necklace", price:42.0, invType:"Items", desc:"Type: Necklace | Material: Gold, green stone | Quantity: 1" },
+        { id:"ruby_and_gold_brooch", name:"Ruby and Gold Brooch", price:36.0, invType:"Items", desc:"Type: Brooch | Material: 10k gold, ruby | Quantity: 1" },
+        { id:"opal_cabochon_ring", name:"Opal Cabochon Ring", price:28.0, invType:"Items", desc:"Type: Ring | Material: Gold, opal | Quantity: 1" },
+        { id:"navajo_silver_concho_belt", name:"Navajo Silver Concho Belt", price:14.0, invType:"Items", desc:"Type: Belt | Material: Stamped coin silver | Quantity: 1" },
+        { id:"zuni_inlay_ring", name:"Zuni Inlay Ring", price:3.25, invType:"Items", desc:"Type: Ring | Material: Silver, stone mosaics | Quantity: 1" },
+        { id:"beaded_lakota_necklace", name:"Beaded Lakota Necklace", price:2.1, invType:"Items", desc:"Type: Necklace | Material: Trade beads, sinew | Quantity: 1" },
+        { id:"snake_shaped_bracelet", name:"Snake-Shaped Bracelet", price:2.75, invType:"Items", desc:"Type: Bracelet | Material: Coiled silver | Quantity: 1" },
+        { id:"scarab_pin_egyptian_revival", name:"Scarab Pin (Egyptian Revival)", price:1.0, invType:"Items", desc:"Type: Pin | Material: Faience/gilt | Quantity: 1" },
+        { id:"good_luck_horseshoe_pin", name:"Good-Luck Horseshoe Pin", price:0.5, invType:"Items", desc:"Type: Pin | Material: Silvered brass | Quantity: 1" },
+        { id:"rabbit_s_foot_necklace", name:"Rabbit’s Foot Necklace", price:0.35, invType:"Items", desc:"Type: Charm | Material: Silver cap, dyed fur | Quantity: 1" },
+        { id:"hairwork_mourning_brooch", name:"Hairwork Mourning Brooch", price:2.6, invType:"Items", desc:"Type: Brooch | Material: Jet frame, glass, hairwork | Quantity: 1" },
+        { id:"brass_signet_ring", name:"Brass Signet Ring", price:0.9, invType:"Items", desc:"Type: Ring | Material: Brass, engraved face | Quantity: 1" },
+        { id:"gold_masonic_ring", name:"Gold Masonic Ring", price:6.5, invType:"Items", desc:"Type: Ring | Material: 10k gold, enamel emblem | Quantity: 1" },
+        { id:"silver_band_scrollwork", name:"Silver Band (Scrollwork)", price:1.25, invType:"Items", desc:"Type: Ring | Material: Sterling silver | Quantity: 1" },
+        { id:"amethyst_cluster_ring", name:"Amethyst Cluster Ring", price:9.5, invType:"Items", desc:"Type: Ring | Material: Gold, amethyst cabochons | Quantity: 1" },
+        { id:"jet_mourning_necklace", name:"Jet Mourning Necklace", price:6.0, invType:"Items", desc:"Type: Necklace | Material: Whitby jet beads | Quantity: 1" },
+        { id:"gold_heart_locket", name:"Gold Heart Locket", price:5.25, invType:"Items", desc:"Type: Necklace | Material: 12k gold, hinge & glass | Quantity: 1" },
+        { id:"victorian_cameo_brooch", name:"Victorian Cameo Brooch", price:2.4, invType:"Items", desc:"Type: Brooch | Material: Shell cameo, gilt frame | Quantity: 1" },
+        { id:"glass_paste_pendant_imitation_gems", name:"Glass Paste Pendant (Imitation Gems)", price:0.75, invType:"Items", desc:"Type: Necklace | Material: Gilt, colored glass | Quantity: 1" },
+        { id:"saint_s_medal", name:"Saint’s Medal", price:0.25, invType:"Items", desc:"Type: Pendant | Material: Silvered brass, stamped | Quantity: 1" },
+        { id:"native_trade_necklace", name:"Native Trade Necklace", price:1.6, invType:"Items", desc:"Type: Necklace | Material: Shell, bone, trade beads | Quantity: 1" },
+        { id:"copper_cross_on_leather_cord", name:"Copper Cross on Leather Cord", price:0.2, invType:"Items", desc:"Type: Necklace | Material: Copper, leather | Quantity: 1" },
+        { id:"tooth_pendant_bear", name:"Tooth Pendant (Bear)", price:1.0, invType:"Items", desc:"Type: Pendant | Material: Bear tooth, silver cap | Quantity: 1" },
+        { id:"tooth_pendant_wolf", name:"Tooth Pendant (Wolf)", price:0.85, invType:"Items", desc:"Type: Pendant | Material: Wolf fang, brass cap | Quantity: 1" },
+        { id:"human_tooth_charm", name:"Human Tooth Charm", price:0.65, invType:"Items", desc:"Type: Pendant | Material: Human tooth, gilt cap | Quantity: 1" },
+        { id:"simple_tin_hoops", name:"Simple Tin Hoops", price:0.06, invType:"Items", desc:"Type: Earrings (Pair) | Material: Tin | Quantity: 1" },
+        { id:"silver_drop_earrings", name:"Silver Drop Earrings", price:0.95, invType:"Items", desc:"Type: Earrings (Pair) | Material: Sterling | Quantity: 1" },
+        { id:"gold_pearl_earrings", name:"Gold & Pearl Earrings", price:3.25, invType:"Items", desc:"Type: Earrings (Pair) | Material: Gold, seed pearls | Quantity: 1" },
+        { id:"turquoise_studs", name:"Turquoise Studs", price:1.1, invType:"Items", desc:"Type: Earrings (Pair) | Material: Turquoise, silver | Quantity: 1" },
+        { id:"jet_teardrop_earrings", name:"Jet Teardrop Earrings", price:1.75, invType:"Items", desc:"Type: Earrings (Pair) | Material: Jet, silver hooks | Quantity: 1" },
+        { id:"diamond_drop_earrings", name:"Diamond Drop Earrings", price:165.0, invType:"Items", desc:"Type: Earrings (Pair) | Material: Gold, old-mine diamonds | Quantity: 1" },
+        { id:"enamel_flower_brooch", name:"Enamel Flower Brooch", price:0.7, invType:"Items", desc:"Type: Brooch | Material: Brass, enamel | Quantity: 1" },
+        { id:"watch_fob_with_miniature_locket", name:"Watch Fob with Miniature Locket", price:1.8, invType:"Items", desc:"Type: Fob | Material: Rolled gold, tiny locket | Quantity: 1" },
+        { id:"gold_plated_chain_rolled_gold", name:"Gold-Plated Chain (Rolled Gold)", price:0.85, invType:"Items", desc:"Type: Chain | Material: Rolled-gold plate | Quantity: 1" },
+        { id:"zuni_inlay_bracelet_stone_mosaics", name:"Zuni Inlay Bracelet (Stone Mosaics)", price:6.0, invType:"Items", desc:"Type: Bracelet | Material: Silver, turquoise/coral | Quantity: 1" },
+        { id:"horseshoe_nail_bracelet", name:"Horseshoe Nail Bracelet", price:0.45, invType:"Items", desc:"Type: Bracelet | Material: Forged nails, polished | Quantity: 1" },
+        { id:"corn_husk_woven_charm", name:"Corn Husk Woven Charm", price:0.05, invType:"Items", desc:"Type: Charm | Material: Plaited husk, waxed | Quantity: 1" },
+        { id:"coin_drilled_pendant_liberty_dime", name:"Coin Drilled Pendant (Liberty Dime)", price:0.2, invType:"Items", desc:"Type: Pendant | Material: Silver coin | Quantity: 1" },
+        { id:"hair_chain_bracelet", name:"Hair Chain Bracelet", price:2.2, invType:"Items", desc:"Type: Bracelet | Material: Braided human hair, gold clasp | Quantity: 1" },
+        { id:"glass_evil_eye_amulet", name:"Glass Evil Eye Amulet", price:0.6, invType:"Items", desc:"Type: Charm | Material: Blue glass, silver mount | Quantity: 1" },
+        { id:"gold_nugget_brooch", name:"Gold Nugget Brooch", price:9.0, invType:"Items", desc:"Type: Brooch | Material: Natural gold nugget, pin mount | Quantity: 1" },
+        { id:"ivory_carved_bracelet", name:"Ivory Carved Bracelet", price:4.5, invType:"Items", desc:"Type: Bracelet | Material: Carved ivory | Quantity: 1" },
+        { id:"ruby_stickpin", name:"Ruby Stickpin", price:3.75, invType:"Items", desc:"Type: Stickpin | Material: Gold, ruby | Quantity: 1" },
+        { id:"emerald_drop_necklace", name:"Emerald Drop Necklace", price:44.0, invType:"Items", desc:"Type: Necklace | Material: Gold, emerald | Quantity: 1" },
+        { id:"diamond_horseshoe_pin", name:"Diamond Horseshoe Pin", price:95.0, invType:"Items", desc:"Type: Pin | Material: Silver/gold, small diamonds | Quantity: 1" },
+        { id:"jeweled_tiara", name:"Jeweled Tiara", price:18.0, invType:"Items", desc:"Type: Headpiece | Material: Silver, paste stones | Quantity: 1" },
+        { id:"coral_bead_necklace", name:"Coral Bead Necklace", price:5.0, invType:"Items", desc:"Type: Necklace | Material: Mediterranean coral, silk | Quantity: 1" },
+        { id:"cufflinks_engraved", name:"Cufflinks (Engraved)", price:1.4, invType:"Items", desc:"Type: Cufflinks (Pair) | Material: Silver or rolled gold | Quantity: 1" },
+        { id:"tie_pin_pearl", name:"Tie Pin (Pearl)", price:1.1, invType:"Items", desc:"Type: Tie Pin | Material: Gold, small pearl | Quantity: 1" },
+        { id:"jet_mourning_brooch_high_relief", name:"Jet Mourning Brooch (High Relief)", price:6.5, invType:"Items", desc:"Type: Brooch | Material: Whitby jet | Quantity: 1" },
+        { id:"hairwork_watch_chain", name:"Hairwork Watch Chain", price:3.2, invType:"Items", desc:"Type: Watch Chain | Material: Braided hair, gold findings | Quantity: 1" },
+        { id:"miniature_portrait_locket_skeleton_image", name:"Miniature Portrait Locket (Skeleton Image)", price:6.25, invType:"Items", desc:"Type: Locket | Material: Gold-filled, hand-painted portrait | Quantity: 1" },
+        { id:"mourning_ring_with_skull_motif", name:"Mourning Ring with Skull Motif", price:8.25, invType:"Items", desc:"Type: Ring | Material: Gold band, enamel skull | Quantity: 1" },
+        { id:"coffin_shaped_mourning_brooch", name:"Coffin-Shaped Mourning Brooch", price:5.0, invType:"Items", desc:"Type: Brooch | Material: Gold outline, black enamel | Quantity: 1" },
+        { id:"forget_me_not_pendant", name:"Forget-Me-Not Pendant", price:2.0, invType:"Items", desc:"Type: Pendant | Material: Turquoise inlay, silver | Quantity: 1" },
+        { id:"lily_of_the_valley_cameo_pin", name:"Lily-of-the-Valley Cameo Pin", price:2.4, invType:"Items", desc:"Type: Brooch | Material: Ivory/shell, silver mount | Quantity: 1" },
+        { id:"rose_motif_pendant", name:"Rose Motif Pendant", price:1.9, invType:"Items", desc:"Type: Pendant | Material: Enamel petals, pearl center | Quantity: 1" },
+        { id:"swallow_brooch", name:"Swallow Brooch", price:1.8, invType:"Items", desc:"Type: Brooch | Material: Silver bird in flight | Quantity: 1" },
+        { id:"acrostic_regard_ring", name:"Acrostic “REGARD” Ring", price:22.0, invType:"Items", desc:"Type: Ring | Material: Gold, R-E-G-A-R-D stones | Quantity: 1" },
+        { id:"acrostic_dearest_bracelet", name:"Acrostic “DEAREST” Bracelet", price:48.0, invType:"Items", desc:"Type: Bracelet | Material: Gold, D-E-A-R-E-S-T stones | Quantity: 1" },
+        { id:"lava_cameo_brooch", name:"Lava Cameo Brooch", price:3.6, invType:"Items", desc:"Type: Brooch | Material: Volcanic stone carving | Quantity: 1" },
+        { id:"micromosaic_brooch", name:"Micromosaic Brooch", price:7.5, invType:"Items", desc:"Type: Brooch | Material: Glass tesserae, gilt frame | Quantity: 1" },
+        { id:"amber_pendant_insect_inclusion", name:"Amber Pendant (Insect Inclusion)", price:4.25, invType:"Items", desc:"Type: Pendant | Material: Baltic amber, silver frame | Quantity: 1" },
+        { id:"tortoiseshell_hair_comb", name:"Tortoiseshell Hair Comb", price:3.1, invType:"Items", desc:"Type: Hair Ornament | Material: Tortoiseshell, carved | Quantity: 1" },
+        { id:"horseshoe_brooch_turquoise_inlay", name:"Horseshoe Brooch (Turquoise Inlay)", price:3.4, invType:"Items", desc:"Type: Brooch | Material: Silver, turquoise | Quantity: 1" },
+        { id:"rabbit_s_foot_fob", name:"Rabbit’s Foot Fob", price:0.4, invType:"Items", desc:"Type: Watch Fob | Material: Fur, silver cap | Quantity: 1" },
+        { id:"liberty_dollar_belt_buckle", name:"Liberty Dollar Belt Buckle", price:1.5, invType:"Items", desc:"Type: Buckle | Material: Brass frame, silver coin | Quantity: 1" },
+        { id:"secret_poison_ring", name:"Secret Poison Ring", price:12.0, invType:"Items", desc:"Type: Ring | Material: Gold, hinged bezel | Quantity: 1" },
+        { id:"secret_note_locket", name:"Secret Note Locket", price:2.2, invType:"Items", desc:"Type: Locket | Material: Silver, hidden paper roll | Quantity: 1" },
+        { id:"miniature_compass_locket", name:"Miniature Compass Locket", price:2.6, invType:"Items", desc:"Type: Locket | Material: Silver, working compass | Quantity: 1" },
+        { id:"tiny_spirit_photograph_locket", name:"Tiny Spirit Photograph Locket", price:3.4, invType:"Items", desc:"Type: Locket | Material: Gold-filled, sepia photo | Quantity: 1" },
+        { id:"diamond_old_mine_cut", name:"Diamond (Old Mine Cut)", price:35.0, invType:"Items", desc:"Type: Gem | Material: Natural diamond, old-mine cut | Quantity: 1 stone (0.25 ct)" },
+        { id:"diamond_old_mine_cut_2", name:"Diamond (Old Mine Cut)", price:90.0, invType:"Items", desc:"Type: Gem | Material: Natural diamond, old-mine cut | Quantity: 1 stone (0.50 ct)" },
+        { id:"diamond_old_mine_cut_3", name:"Diamond (Old Mine Cut)", price:240.0, invType:"Items", desc:"Type: Gem | Material: Natural diamond, old-mine cut | Quantity: 1 stone (1.00 ct)" },
+        { id:"ruby_burmese", name:"Ruby (Burmese)", price:70.0, invType:"Items", desc:"Type: Gem | Material: Natural corundum, deep red | Quantity: 1 stone (0.50 ct)" },
+        { id:"ruby_burmese_2", name:"Ruby (Burmese)", price:180.0, invType:"Items", desc:"Type: Gem | Material: Natural corundum | Quantity: 1 stone (1.00 ct)" },
+        { id:"sapphire_ceylon_blue", name:"Sapphire (Ceylon Blue)", price:50.0, invType:"Items", desc:"Type: Gem | Material: Natural corundum, blue | Quantity: 1 stone (0.50 ct)" },
+        { id:"sapphire_ceylon_blue_2", name:"Sapphire (Ceylon Blue)", price:120.0, invType:"Items", desc:"Type: Gem | Material: Natural corundum, blue | Quantity: 1 stone (1.00 ct)" },
+        { id:"emerald_colombian", name:"Emerald (Colombian)", price:90.0, invType:"Items", desc:"Type: Gem | Material: Natural beryl, jardin visible | Quantity: 1 stone (0.50 ct)" },
+        { id:"spinel_red", name:"Spinel (Red)", price:20.0, invType:"Items", desc:"Type: Gem | Material: Natural spinel | Quantity: 1 stone (1.00 ct)" },
+        { id:"garnet_bohemian", name:"Garnet (Bohemian)", price:2.0, invType:"Items", desc:"Type: Gem | Material: Natural almandine | Quantity: 1 stone (1.00 ct)" },
+        { id:"amethyst", name:"Amethyst", price:1.5, invType:"Items", desc:"Type: Gem | Material: Natural quartz, purple | Quantity: 1 stone (3.00 ct)" },
+        { id:"citrine_spanish_topaz", name:"Citrine (“Spanish Topaz”)", price:1.2, invType:"Items", desc:"Type: Gem | Material: Natural quartz, golden | Quantity: 1 stone (3.00 ct)" },
+        { id:"topaz_imperial", name:"Topaz (Imperial)", price:8.0, invType:"Items", desc:"Type: Gem | Material: Natural topaz, golden-pink | Quantity: 1 stone (2.00 ct)" },
+        { id:"peridot_chrysolite", name:"Peridot (Chrysolite)", price:3.0, invType:"Items", desc:"Type: Gem | Material: Natural olivine, green | Quantity: 1 stone (2.00 ct)" },
+        { id:"opal_australian_white", name:"Opal (Australian White)", price:18.0, invType:"Items", desc:"Type: Gem | Material: Natural opal, cabochon | Quantity: 1 stone (3.00 ct)" },
+        { id:"fire_opal_mexican", name:"Fire Opal (Mexican)", price:6.0, invType:"Items", desc:"Type: Gem | Material: Natural opal, orange cab | Quantity: 1 stone (2.00 ct)" },
+        { id:"moonstone", name:"Moonstone", price:2.5, invType:"Items", desc:"Type: Gem | Material: Orthoclase feldspar, cab | Quantity: 1 stone (3.00 ct)" },
+        { id:"onyx_cameo_blank", name:"Onyx Cameo Blank", price:0.8, invType:"Items", desc:"Type: Gem Blank | Material: Banded onyx, two-layer | Quantity: 1 oval (18×13 mm)" },
+        { id:"agate_oval", name:"Agate Oval", price:0.4, invType:"Items", desc:"Type: Gem | Material: Banded agate | Quantity: 1 oval (20×15 mm)" },
+        { id:"lapis_lazuli", name:"Lapis Lazuli", price:0.9, invType:"Items", desc:"Type: Gem | Material: Afghan lapis, cab | Quantity: 1 stone (10×8 mm)" },
+        { id:"malachite", name:"Malachite", price:0.55, invType:"Items", desc:"Type: Gem | Material: Copper carbonate, banded | Quantity: 1 stone (18×13 mm)" },
+        { id:"turquoise_persian", name:"Turquoise (Persian)", price:2.0, invType:"Items", desc:"Type: Gem | Material: Sky-blue turquoise, cab | Quantity: 1 stone (5.0 ct)" },
+        { id:"turquoise_nevada_nugget", name:"Turquoise (Nevada Nugget)", price:0.8, invType:"Items", desc:"Type: Gem | Material: Turquoise with matrix | Quantity: 1 stone (5.0 ct)" },
+        { id:"whitby_jet_plaque", name:"Whitby Jet Plaque", price:0.6, invType:"Items", desc:"Type: Ornament Stone | Material: Jet, carved blank | Quantity: 1 plaque (1 in)" },
+        { id:"coral_branch_red", name:"Coral Branch (Red)", price:0.75, invType:"Items", desc:"Type: Ornament Stone | Material: Mediterranean coral | Quantity: 1 piece (2 in)" },
+        { id:"amber_insect_inclusion", name:"Amber (Insect Inclusion)", price:2.5, invType:"Items", desc:"Type: Gem | Material: Baltic amber | Quantity: 1 stone (10.0 ct)" },
+        { id:"pearl_natural", name:"Pearl (Natural)", price:18.0, invType:"Items", desc:"Type: Gem | Material: River pearl, near-round | Quantity: 1 pearl (6 mm)" },
+        { id:"seed_pearls_assortment", name:"Seed Pearls (Assortment)", price:3.5, invType:"Items", desc:"Type: Gem Lot | Material: Natural seed pearls | Quantity: 100 pcs (1–2 mm)" },
+        { id:"glass_paste_stones_assorted", name:"Glass Paste Stones (Assorted)", price:0.3, invType:"Items", desc:"Type: Imitation | Material: Foil-backed colored glass | Quantity: 10 stones (various cuts)" },
+        { id:"shell_cameo_blank_italian", name:"Shell Cameo Blank (Italian)", price:1.2, invType:"Items", desc:"Type: Gem Blank | Material: Shell (sardonyx), oval | Quantity: 1 blank (30×22 mm)" },
+      ],
+
+      "Clothing": [
+        { id:"silk_cravat", name:"Silk Cravat", price:1.5, invType:"Items", desc:"Material: Silk" },
+        { id:"calico_shirt", name:"Calico Shirt", price:1.0, invType:"Items", desc:"category: shirts | material: cotton calico | warmth: light | details: breathable; quick to dry; good for trail dust" },
+        { id:"work_shirt", name:"Work Shirt", price:1.1, invType:"Items", desc:"category: shirts | material: sturdy cotton | warmth: light | details: loose cut; rolled-sleeve buttons" },
+        { id:"flannel_work_shirt", name:"Flannel Work Shirt", price:1.35, invType:"Items", desc:"category: shirts | material: wool flannel | warmth: medium | details: insulates when damp; elbow reinforcements" },
+        { id:"striped_cotton_shirt", name:"Striped Cotton Shirt", price:1.2, invType:"Items", desc:"category: shirts | material: cotton | color: striped gray | warmth: light | details: reinforced placket; launders easily" },
+        { id:"chambray_shirt", name:"Chambray Shirt", price:1.15, invType:"Items", desc:"category: shirts | material: cotton chambray | warmth: light | details: soft hand; sun-fade friendly" },
+        { id:"striped_drill_shirt", name:"Striped Drill Shirt", price:1.25, invType:"Items", desc:"category: shirts | material: cotton drill | color: striped gray | warmth: light | details: tough weave; stays tucked" },
+        { id:"cotton_muslin_shirt", name:"Cotton Muslin Shirt", price:0.85, invType:"Items", desc:"category: shirts | material: muslin | color: white | warmth: light | details: cheap & cool; tears mend easily" },
+        { id:"henley_shirt_three_button_placket", name:"Henley Shirt (Three-Button Placket)", price:1.0, invType:"Items", desc:"category: shirts | material: cotton knit | warmth: light | details: vented neck; easy layering" },
+        { id:"flannel_overshirt_checked", name:"Flannel Overshirt (Checked)", price:1.5, invType:"Items", desc:"category: shirts | material: wool flannel | color: red plaid | warmth: medium | details: boxy fit; camp comfort" },
+        { id:"bib_front_shirt_fireman_s_style", name:"Bib-Front Shirt (Fireman’s Style)", price:1.6, invType:"Items", desc:"category: shirts | material: heavy cotton | warmth: medium | details: button-off bib for soot & sparks" },
+        { id:"collarless_grandfather_shirt", name:"Collarless Grandfather Shirt", price:1.35, invType:"Items", desc:"category: shirts | material: cotton/linen | warmth: light | details: band collar; Sunday-civil" },
+        { id:"wool_overshirt_with_bone_buttons", name:"Wool Overshirt with Bone Buttons", price:1.8, invType:"Items", desc:"category: shirts | material: wool | warmth: medium | details: bone toggles; wind-stopping weave" },
+        { id:"silk_waistcoat", name:"Silk Waistcoat", price:3.5, invType:"Items", desc:"category: waistcoats | material: silk brocade | warmth: light | details: gambler-bright; pocket-watch chain tab" },
+        { id:"wool_waistcoat", name:"Wool Waistcoat", price:2.25, invType:"Items", desc:"category: waistcoats | material: wool | warmth: light | details: keeps core warm under coats" },
+        { id:"quilted_vest_homespun_wool", name:"Quilted Vest (Homespun Wool)", price:2.0, invType:"Items", desc:"category: waistcoats | material: quilted wool | warmth: medium | details: stitched baffles; stable body heat" },
+        { id:"duck_cloth_vest", name:"Duck Cloth Vest", price:1.4, invType:"Items", desc:"category: waistcoats | material: cotton duck | color: brown | warmth: light | details: tool pockets; tough front" },
+        { id:"leather_vest_tooled_or_plain", name:"Leather Vest (Tooled or Plain)", price:3.0, invType:"Items", desc:"category: waistcoats | material: cowhide | color: brown | warmth: light | details: card table swagger; stain-hides" },
+        { id:"fancy_gambler_s_waistcoat_silk_brocade", name:"Fancy Gambler’s Waistcoat (Silk Brocade)", price:4.25, invType:"Items", desc:"category: waistcoats | material: silk brocade | color: maroon | warmth: light | details: satin back; coin pocket" },
+        { id:"oilcloth_duster", name:"Oilcloth Duster", price:3.25, invType:"Items", desc:"category: coats | material: oilskin | warmth: light | details: rain-shedding; saddle-slit back" },
+        { id:"canvas_work_coat", name:"Canvas Work Coat", price:2.4, invType:"Items", desc:"category: coats | material: canvas | warmth: medium | details: triple-stitched seams; tool pockets" },
+        { id:"canvas_field_jacket", name:"Canvas Field Jacket", price:2.8, invType:"Items", desc:"category: coats | material: cotton duck | warmth: medium | details: brass buttons; map pocket" },
+        { id:"denim_work_jacket", name:"Denim Work Jacket", price:2.6, invType:"Items", desc:"category: coats | material: denim | color: indigo | warmth: medium | details: riveted stress points" },
+        { id:"mackinaw_jacket_plaid_wool", name:"Mackinaw Jacket (Plaid Wool)", price:5.5, invType:"Items", desc:"category: coats | material: wool | color: red plaid | warmth: heavy | details: storm collar; logging-ready" },
+        { id:"frock_coat_everyday_black", name:"Frock Coat (Everyday Black)", price:7.5, invType:"Items", desc:"category: coats | material: wool broadcloth | color: black | warmth: medium | details: town-cut; deep tails" },
+        { id:"frock_coat_long_heavy", name:"Frock Coat (Long, Heavy)", price:10.0, invType:"Items", desc:"category: coats | material: heavy wool | color: charcoal | warmth: heavy | details: cold-station waiting coat" },
+        { id:"overcoat_heavy_wool_plain", name:"Overcoat (Heavy Wool, Plain)", price:12.0, invType:"Items", desc:"category: coats | material: heavy wool | warmth: heavy | details: big lapels; winter mainstay" },
+        { id:"shearling_jacket", name:"Shearling Jacket", price:9.0, invType:"Items", desc:"category: coats | material: sheepskin | color: tan | warmth: heavy | details: fleece lining; wind cutter" },
+        { id:"sheepskin_coat", name:"Sheepskin Coat", price:8.5, invType:"Items", desc:"category: coats | material: sheepskin | color: brown | warmth: heavy | details: barn-to-banquets warm" },
+        { id:"buffalo_hide_coat", name:"Buffalo Hide Coat", price:18.0, invType:"Items", desc:"category: coats | material: buffalo hide | color: dark brown | warmth: heavy | details: frontier blizzard-proof" },
+        { id:"quilted_winter_coat", name:"Quilted Winter Coat", price:7.25, invType:"Items", desc:"category: coats | material: quilted wool/cotton | warmth: heavy | details: stitched baffles; draft guard" },
+        { id:"military_greatcoat", name:"Military Greatcoat", price:14.0, invType:"Items", desc:"category: coats | material: thick wool | color: field gray | warmth: heavy | details: capelet shoulders; button storm flap" },
+        { id:"fringed_buckskin_jacket", name:"Fringed Buckskin Jacket", price:7.0, invType:"Items", desc:"category: coats | material: tanned deerhide | color: buckskin | warmth: medium | details: sheds rain; fringe dries fast" },
+        { id:"rain_cape_waxed_cotton", name:"Rain Cape (Waxed Cotton)", price:2.9, invType:"Items", desc:"category: coats | material: waxed cotton | warmth: light | details: packable; covers rifle" },
+        { id:"traveling_cloak", name:"Traveling Cloak", price:6.5, invType:"Items", desc:"category: coats | material: wool | warmth: heavy | details: hooded; train-draught stopper" },
+        { id:"bearskin_cloak", name:"Bearskin Cloak", price:32.0, invType:"Items", desc:"category: coats | material: bear hide | color: black | warmth: extreme | details: campfire throne; weather laughs" },
+        { id:"redingote_cutaway_coat", name:"Redingote (Cutaway Coat)", price:9.0, invType:"Items", desc:"category: coats | material: wool | warmth: medium | details: tailored; carriage-smart" },
+        { id:"pelisse_fur_trimmed_coat", name:"Pelisse (Fur-Trimmed Coat)", price:16.0, invType:"Items", desc:"category: coats | material: wool with fur trim | warmth: heavy | details: parade-warmth; ballroom doorlines" },
+        { id:"greatcoat_with_caped_shoulders", name:"Greatcoat with Caped Shoulders", price:15.0, invType:"Items", desc:"category: coats | material: heavy wool | color: navy | warmth: heavy | details: rain channeling cape" },
+        { id:"undertaker_s_coat", name:"Undertaker’s Coat", price:8.0, invType:"Items", desc:"category: coats | material: black wool | color: black | warmth: medium | details: sober cut; long vent" },
+        { id:"gambler_s_coat_short_frock", name:"Gambler’s Coat (Short Frock)", price:9.5, invType:"Items", desc:"category: coats | material: fine wool | color: black | warmth: light | details: quick-draw friendly tails" },
+        { id:"medicine_show_cape", name:"Medicine Show Cape", price:6.75, invType:"Items", desc:"category: coats | material: velvet-lined broadcloth | color: maroon | warmth: light | details: flourish-ready; inner stash pockets" },
+        { id:"homespun_wool_cape", name:"Homespun Wool Cape", price:3.5, invType:"Items", desc:"category: coats | material: homespun wool | warmth: medium | details: pin clasp; church steps warm" },
+        { id:"buffalo_robe_poncho", name:"Buffalo Robe Poncho", price:11.0, invType:"Items", desc:"category: coats | material: buffalo robe | color: dark brown | warmth: heavy | details: camp-sleep substitute" },
+        { id:"blanket_poncho", name:"Blanket Poncho", price:3.0, invType:"Items", desc:"category: coats | material: wool blanket | color: gray | warmth: medium | details: cut head-slit; rain sheds off" },
+        { id:"homespun_trousers", name:"Homespun Trousers", price:1.75, invType:"Items", desc:"category: pants | material: homespun wool/cotton | warmth: medium | details: seat patch; fence-snag resistant" },
+        { id:"duck_cloth_pants", name:"Duck Cloth Pants", price:1.9, invType:"Items", desc:"category: pants | material: cotton duck | color: brown | warmth: medium | details: triple-stitched; tool loops" },
+        { id:"corduroy_trousers", name:"Corduroy Trousers", price:2.75, invType:"Items", desc:"category: pants | material: corduroy | color: brown | warmth: medium | details: brush-silent; warm ridges" },
+        { id:"broadfall_trousers_button_front", name:"Broadfall Trousers (Button-Front)", price:2.1, invType:"Items", desc:"category: pants | material: wool/cotton | warmth: medium | details: early fly; suspenders buttons" },
+        { id:"woolen_trousers_tweed", name:"Woolen Trousers (Tweed)", price:2.6, invType:"Items", desc:"category: pants | material: wool tweed | color: gray | warmth: medium | details: town service; crease holds" },
+        { id:"canvas_riveted_pants", name:"Canvas Riveted Pants", price:2.25, invType:"Items", desc:"category: pants | material: riveted canvas/denim | color: indigo | warmth: medium | details: mine-tested knees" },
+        { id:"leather_breeches", name:"Leather Breeches", price:4.0, invType:"Items", desc:"category: pants | material: cowhide | color: brown | warmth: medium | details: saddle-slick; thorn-proof" },
+        { id:"canvas_sack_pants", name:"Canvas “Sack” Pants", price:1.6, invType:"Items", desc:"category: pants | material: canvas | color: tan | warmth: light | details: roomy seat; cheap & durable" },
+        { id:"drawstring_linen_pants", name:"Drawstring Linen Pants", price:1.25, invType:"Items", desc:"category: pants | material: linen | color: cream | warmth: light | details: heat-tolerant; docks & bathhouses" },
+        { id:"leather_chopper_s_pants", name:"Leather Chopper’s Pants", price:4.5, invType:"Items", desc:"category: pants | material: oiled leather | color: dark brown | warmth: medium | details: deflects chips; logging" },
+        { id:"duck_cloth_jacket_lined", name:"Duck Cloth Jacket (Lined)", price:3.1, invType:"Items", desc:"category: tops | material: lined duck cloth | color: tan | warmth: medium | details: wind-block; barn duty" },
+        { id:"miner_s_overalls", name:"Miner’s Overalls", price:1.5, invType:"Items", desc:"category: workwear | material: denim | color: indigo | warmth: light | details: bib pocket; riveted stress points" },
+        { id:"canvas_apron", name:"Canvas Apron", price:0.55, invType:"Items", desc:"category: workwear | material: canvas | color: tan | warmth: n/a | details: forge & shop grime shield" },
+        { id:"leather_apron", name:"Leather Apron", price:1.4, invType:"Items", desc:"category: workwear | material: heavy leather | color: brown | warmth: n/a | details: spark & edge resist" },
+        { id:"canvas_work_coat_2", name:"Canvas Work Coat", price:2.4, invType:"Items", desc:"category: workwear | material: canvas | warmth: medium | details: carpenter’s pockets" },
+        { id:"woolen_undershirt_drawers", name:"Woolen Undershirt & Drawers", price:1.2, invType:"Items", desc:"category: underclothes | material: wool knit | color: gray | warmth: medium | details: insulates even damp" },
+        { id:"cotton_undershirt_drawers", name:"Cotton Undershirt & Drawers", price:0.95, invType:"Items", desc:"category: underclothes | material: cotton knit | color: white | warmth: light | details: easy wash; summer set" },
+        { id:"union_suit", name:"Union Suit", price:1.35, invType:"Items", desc:"category: underclothes | material: cotton/wool blend | color: natural | warmth: medium | details: full-body; rear flap" },
+        { id:"woolen_long_johns", name:"Woolen Long Johns", price:1.1, invType:"Items", desc:"category: underclothes | material: wool knit | color: gray | warmth: medium | details: ankle cuffs; camp-proof" },
+        { id:"cotton_drawers_split_crotch", name:"Cotton Drawers (Split Crotch)", price:0.7, invType:"Items", desc:"category: underclothes | material: cotton | color: white | warmth: light | details: easy facilities; stays cool" },
+        { id:"chemise_petticoats", name:"Chemise & Petticoats", price:1.6, invType:"Items", desc:"category: underclothes | material: cotton | color: white | warmth: light | details: foundation layers; modesty assured" },
+        { id:"corset_whalebone", name:"Corset (Whalebone)", price:4.25, invType:"Items", desc:"category: underclothes | material: coutil & whalebone | color: ivory | warmth: n/a | details: busk front; tight-lace capable" },
+        { id:"work_corset_sturdy_cotton_leather_stays", name:"Work Corset (Sturdy Cotton/Leather Stays)", price:2.25, invType:"Items", desc:"category: underclothes | material: cotton with leather stays | warmth: n/a | details: barn & ride friendly" },
+        { id:"corset_cover_cotton", name:"Corset Cover (Cotton)", price:0.65, invType:"Items", desc:"category: underclothes | material: cotton | color: white | warmth: light | details: protects outer bodice" },
+        { id:"bustle_pad", name:"Bustle Pad", price:0.8, invType:"Items", desc:"category: underclothes | material: horsehair/cotton | color: white | warmth: n/a | details: small lift; sits under skirt" },
+        { id:"bustle_frame", name:"Bustle Frame", price:1.4, invType:"Items", desc:"category: underclothes | material: wire & cotton | color: white | warmth: n/a | details: collapsible; big-city curve" },
+        { id:"crinoline_cage", name:"Crinoline Cage", price:2.5, invType:"Items", desc:"category: underclothes | material: steel hoops | color: black | warmth: n/a | details: wide sweep; ballroom ready" },
+        { id:"wool_petticoat_underskirt", name:"Wool Petticoat (Underskirt)", price:1.1, invType:"Items", desc:"category: underclothes | material: wool | warmth: medium | details: winter skirt liner" },
+        { id:"calico_work_dress", name:"Calico Work Dress", price:2.1, invType:"Items", desc:"category: dresses | material: cotton calico | warmth: light | details: patch-friendly; fieldwork hem" },
+        { id:"gingham_dress", name:"Gingham Dress", price:2.4, invType:"Items", desc:"category: dresses | material: cotton gingham | color: sky blue check | warmth: light | details: porch-cool; washable" },
+        { id:"polonaise_dress", name:"Polonaise Dress", price:8.5, invType:"Items", desc:"category: dresses | material: silk/wool blend | warmth: medium | details: bustle-friendly; city fashion" },
+        { id:"empire_waist_dress", name:"Empire-Waist Dress", price:6.75, invType:"Items", desc:"category: dresses | material: muslin/silk | color: cream | warmth: light | details: high waist; summer assemblies" },
+        { id:"wool_skirt", name:"Wool Skirt", price:2.6, invType:"Items", desc:"category: dresses | material: wool serge | warmth: medium | details: deep hem facing" },
+        { id:"embroidered_bodice", name:"Embroidered Bodice", price:3.0, invType:"Items", desc:"category: dresses | material: cotton/silk | warmth: light | details: floral stitches; parlor-proud" },
+        { id:"pinafore_apron_over_dress", name:"Pinafore Apron (Over-Dress)", price:0.55, invType:"Items", desc:"category: dresses | material: cotton | color: white | warmth: n/a | details: protects bodice; ruffle trim" },
+        { id:"lace_shawl", name:"Lace Shawl", price:1.8, invType:"Items", desc:"category: wraps | material: lace | color: cream | warmth: light | details: dress topper; evening breeze" },
+        { id:"shawl_paisley", name:"Shawl (Paisley)", price:1.6, invType:"Items", desc:"category: wraps | material: wool | color: paisley | warmth: medium | details: shoulder warmth; station waits" },
+        { id:"wool_shawl", name:"Wool Shawl", price:1.2, invType:"Items", desc:"category: wraps | material: wool | warmth: medium | details: hearth-warm; wraps tight" },
+        { id:"lace_pelerine_shoulder_cape", name:"Lace Pelerine (Shoulder Cape)", price:1.25, invType:"Items", desc:"category: wraps | material: lace | color: white | warmth: light | details: buttons at throat" },
+        { id:"traveling_cloak_2", name:"Traveling Cloak", price:6.5, invType:"Items", desc:"category: wraps | material: wool | warmth: heavy | details: hood; luggage loop" },
+        { id:"broad_brimmed_wool_hat", name:"Broad-Brimmed Wool Hat", price:1.75, invType:"Items", desc:"category: headwear | material: wool felt | warmth: light | details: sun & rain shade" },
+        { id:"felt_slouch_hat", name:"Felt Slouch Hat", price:1.6, invType:"Items", desc:"category: headwear | material: wool felt | warmth: light | details: brim droops to shed rain" },
+        { id:"bowler_hat", name:"Bowler Hat", price:2.75, invType:"Items", desc:"category: headwear | material: hard felt | warmth: light | details: ride-safe crown; town stout" },
+        { id:"derby_bowler_cheap_felt", name:"Derby Bowler (Cheap Felt)", price:1.35, invType:"Items", desc:"category: headwear | material: felt | warmth: light | details: budget brim; dance-hall ready" },
+        { id:"top_hat", name:"Top Hat", price:12.0, invType:"Items", desc:"category: headwear | material: beaver felt | color: black | warmth: light | details: high-crown; saloon authority" },
+        { id:"tailcoat", name:"Tailcoat", price:14.0, invType:"Items", desc:"category: formalwear | material: fine wool | color: black | warmth: medium | details: swallow tails; ballroom cut" },
+        { id:"morning_coat", name:"Morning Coat", price:11.0, invType:"Items", desc:"category: formalwear | material: wool | color: charcoal | warmth: medium | details: cutaway front; day dress" },
+        { id:"veil_hat", name:"Veil Hat", price:2.1, invType:"Items", desc:"category: headwear | material: felt with net veil | color: black | warmth: light | details: dust & discretion" },
+        { id:"miner_s_cap", name:"Miner’s Cap", price:0.9, invType:"Items", desc:"category: headwear | material: leather | color: brown | warmth: light | details: tallow-candle clip" },
+        { id:"flat_cap", name:"Flat Cap", price:0.85, invType:"Items", desc:"category: headwear | material: wool tweed | color: gray | warmth: light | details: low brim; rail yard fit" },
+        { id:"porkpie_hat", name:"Porkpie Hat", price:1.8, invType:"Items", desc:"category: headwear | material: felt | warmth: light | details: gambler brim; jaunty" },
+        { id:"wide_palm_straw_hat", name:"Wide Palm Straw Hat", price:0.95, invType:"Items", desc:"category: headwear | material: braided palm | color: straw | warmth: light | details: heat shield; field favorite" },
+        { id:"wide_straw_sun_hat", name:"Wide Straw Sun Hat", price:0.85, invType:"Items", desc:"category: headwear | material: straw | color: straw | warmth: light | details: garden brim; ventilated crown" },
+        { id:"civilian_kepi", name:"Civilian Kepi", price:1.1, invType:"Items", desc:"category: headwear | material: wool | warmth: light | details: town militia look" },
+        { id:"silk_bonnet", name:"Silk Bonnet", price:2.6, invType:"Items", desc:"category: headwear | material: silk | warmth: light | details: ribbon ties; Sunday best" },
+        { id:"sunbonnet", name:"Sunbonnet", price:0.65, invType:"Items", desc:"category: headwear | material: calico | warmth: light | details: long brim; prairie-proof" },
+        { id:"mob_cap", name:"Mob Cap", price:0.4, invType:"Items", desc:"category: headwear | material: cotton | color: white | warmth: light | details: kitchen & sickroom" },
+        { id:"veiled_mourning_bonnet", name:"Veiled Mourning Bonnet", price:2.85, invType:"Items", desc:"category: headwear | material: crepe & straw | color: black | warmth: light | details: full face veil" },
+        { id:"feathered_hatpin", name:"Feathered Hatpin", price:0.25, invType:"Items", desc:"category: accessories | material: steel & plume | color: black | warmth: n/a | details: secures tall hats; last-ditch defense" },
+        { id:"american_cockade_pin", name:"American Cockade Pin", price:0.2, invType:"Items", desc:"category: accessories | material: ribbon & brass | color: red-white-blue | warmth: n/a | details: lapel pride" },
+        { id:"sugarloaf_hat", name:"Sugarloaf Hat", price:2.1, invType:"Items", desc:"category: headwear | material: felt | warmth: light | details: tall crown; riverboat style" },
+        { id:"boss_of_the_plains_hat", name:"Boss of the Plains Hat", price:7.5, invType:"Items", desc:"category: headwear | material: beaver felt | warmth: light | details: iconic flat brim; cattle-proof" },
+        { id:"wool_knit_cap", name:"Wool Knit Cap", price:0.5, invType:"Items", desc:"category: headwear | material: knit wool | warmth: medium | details: fits under hoods" },
+        { id:"quaker_broad_brim_hat", name:"Quaker Broad-Brim Hat", price:2.25, invType:"Items", desc:"category: headwear | material: felt | color: black | warmth: light | details: plain style; stern brim" },
+        { id:"palm_leaf_sombrero", name:"Palm Leaf Sombrero", price:1.1, invType:"Items", desc:"category: headwear | material: palm straw | color: straw | warmth: light | details: desert shade; lariat-friendly" },
+        { id:"cowboy_sombrero_felt", name:"Cowboy Sombrero (Felt)", price:2.9, invType:"Items", desc:"category: headwear | material: felt | warmth: light | details: high crown; wet-formable" },
+        { id:"beaver_felt_hat_premium_stetson", name:"Beaver Felt Hat (Premium Stetson)", price:15.0, invType:"Items", desc:"category: headwear | material: beaver felt | warmth: light | details: lifetime crown; rainproof" },
+        { id:"slouch_hat_wool_felt", name:"Slouch Hat (Wool Felt)", price:1.6, invType:"Items", desc:"category: headwear | material: wool felt | warmth: light | details: trail droop; storm brim" },
+        { id:"high_crown_gambler_s_hat", name:"High-Crown Gambler’s Hat", price:3.25, invType:"Items", desc:"category: headwear | material: felt | color: black | warmth: light | details: flat brim; card-table shade" },
+        { id:"engineer_s_cap_striped_cotton", name:"Engineer’s Cap (Striped Cotton)", price:0.85, invType:"Items", desc:"category: headwear | material: striped cotton | color: blue/white stripe | warmth: light | details: bill shields cinders" },
+        { id:"coonskin_cap_with_tail", name:"Coonskin Cap (with Tail)", price:2.6, invType:"Items", desc:"category: headwear | material: raccoon fur | color: brown | warmth: medium | details: frontier flair; ear warm" },
+        { id:"skunk_pelt_cap", name:"Skunk Pelt Cap", price:2.1, invType:"Items", desc:"category: headwear | material: skunk fur | color: black/white | warmth: medium | details: bold stripe; camp stories" },
+        { id:"otter_fur_cap", name:"Otter Fur Cap", price:3.4, invType:"Items", desc:"category: headwear | material: otter | color: dark brown | warmth: medium | details: water-shedding nap" },
+        { id:"napoleon_bicorne_hat", name:"Napoleon Bicorne Hat", price:6.0, invType:"Items", desc:"category: headwear | material: felt | color: black | warmth: light | details: parade swagger" },
+        { id:"cocked_tricorn_hat", name:"Cocked Tricorn Hat", price:4.0, invType:"Items", desc:"category: headwear | material: felt | color: black | warmth: light | details: old-country cut" },
+        { id:"quilted_nightcap", name:"Quilted Nightcap", price:0.35, invType:"Items", desc:"category: headwear | material: quilted cotton | color: cream | warmth: light | details: keeps heat in; drafty rooms" },
+        { id:"wool_stocking_cap", name:"Wool Stocking Cap", price:0.45, invType:"Items", desc:"category: headwear | material: knit wool | warmth: medium | details: long tassel; bunkhouse warm" },
+        { id:"leather_boots", name:"Leather Boots", price:3.25, invType:"Items", desc:"category: footwear | material: leather | warmth: medium | details: mid-calf; ranch standard" },
+        { id:"moccasins", name:"Moccasins", price:1.1, invType:"Items", desc:"category: footwear | material: soft leather | color: tan | warmth: light | details: quiet tread; camp comfort" },
+        { id:"wool_socks", name:"Wool Socks", price:0.12, invType:"Items", desc:"category: footwear | material: wool knit | color: gray | warmth: medium | details: blister guard; dries by the stove" },
+        { id:"button_boots", name:"Button Boots", price:3.0, invType:"Items", desc:"category: footwear | material: leather | color: black | warmth: medium | details: high ankle; button hook needed" },
+        { id:"calfskin_boots", name:"Calfskin Boots", price:4.25, invType:"Items", desc:"category: footwear | material: calfskin | warmth: medium | details: smooth ride; town polish" },
+        { id:"spurred_boots", name:"Spurred Boots", price:3.9, invType:"Items", desc:"category: footwear | material: leather & steel | warmth: medium | details: fixed rowels; stirrup-ready" },
+        { id:"high_top_work_boots_laced", name:"High-Top Work Boots (Laced)", price:3.6, invType:"Items", desc:"category: footwear | material: leather | warmth: medium | details: ankle support; mine ladders" },
+        { id:"low_cut_brogans", name:"Low-Cut Brogans", price:2.1, invType:"Items", desc:"category: footwear | material: leather | color: brown | warmth: light | details: hobnails optional" },
+        { id:"cowhide_moccasins_plains_style", name:"Cowhide Moccasins (Plains Style)", price:1.2, invType:"Items", desc:"category: footwear | material: cowhide | color: tan | warmth: light | details: soft sole; quiet hunt" },
+        { id:"rubber_overshoes_galoshes", name:"Rubber Overshoes (Galoshes)", price:1.25, invType:"Items", desc:"category: footwear | material: rubber | color: black | warmth: light | details: mud & slush cover" },
+        { id:"square_toed_boots", name:"Square-Toed Boots", price:2.9, invType:"Items", desc:"category: footwear | material: leather | warmth: medium | details: easy stirrup entry" },
+        { id:"calfskin_low_shoes_plain", name:"Calfskin Low Shoes (Plain)", price:2.4, invType:"Items", desc:"category: footwear | material: calfskin | color: black | warmth: light | details: court & church" },
+        { id:"double_sole_miner_s_boots", name:"Double-Sole Miner’s Boots", price:4.6, invType:"Items", desc:"category: footwear | material: leather | color: dark brown | warmth: medium | details: double welt; shaft guards" },
+        { id:"sheepskin_slippers", name:"Sheepskin Slippers", price:0.95, invType:"Items", desc:"category: footwear | material: sheepskin | color: cream | warmth: medium | details: cabin comfort; quiet pads" },
+        { id:"wooden_clogs_imported_or_homemade", name:"Wooden Clogs (Imported or Homemade)", price:0.75, invType:"Items", desc:"category: footwear | material: wood | color: natural | warmth: light | details: mud yard; easy hose-off" },
+        { id:"rawhide_sandals_makeshift", name:"Rawhide Sandals (Makeshift)", price:0.35, invType:"Items", desc:"category: footwear | material: rawhide | color: tan | warmth: light | details: emergency trail fix" },
+        { id:"spurred_riding_boots", name:"Spurred Riding Boots", price:4.2, invType:"Items", desc:"category: footwear | material: leather & steel | warmth: medium | details: long heel; pen work" },
+        { id:"snake_skin_boots", name:"Snake-Skin Boots", price:9.5, invType:"Items", desc:"category: footwear | material: snakeskin over leather | color: natural pattern | warmth: light | details: saloon showpiece" },
+        { id:"leather_gloves", name:"Leather Gloves", price:0.85, invType:"Items", desc:"category: gloves | material: leather | warmth: medium | details: reins & rope safe" },
+        { id:"fancy_kid_gloves", name:"Fancy Kid Gloves", price:2.1, invType:"Items", desc:"category: gloves | material: kid leather | color: cream | warmth: light | details: ballroom soft; stains easy" },
+        { id:"opera_gloves_white_silk", name:"Opera Gloves (White Silk)", price:1.9, invType:"Items", desc:"category: gloves | material: silk | color: white | warmth: light | details: elbow length; evening" },
+        { id:"woolen_mittens", name:"Woolen Mittens", price:0.3, invType:"Items", desc:"category: gloves | material: knit wool | warmth: medium | details: camp chores; frost guard" },
+        { id:"bandana", name:"Bandana", price:0.15, invType:"Items", desc:"category: scarves | material: cotton | warmth: light | details: dust mask; signal cloth" },
+        { id:"silk_wild_rag_bandana", name:"Silk Wild Rag (Bandana)", price:1.25, invType:"Items", desc:"category: scarves | material: silk | warmth: light | details: wind seal at neck" },
+        { id:"knitted_wool_scarf", name:"Knitted Wool Scarf", price:0.45, invType:"Items", desc:"category: scarves | material: knit wool | warmth: medium | details: wraps twice; stove-dry" },
+        { id:"cotton_neck_cloth", name:"Cotton Neck Cloth", price:0.2, invType:"Items", desc:"category: scarves | material: cotton | warmth: light | details: church modesty; dust wipe" },
+        { id:"pocket_handkerchief_checkered", name:"Pocket Handkerchief (Checkered)", price:0.1, invType:"Items", desc:"category: accessories | material: cotton | color: checked brown | warmth: n/a | details: coughs & cards" },
+        { id:"wool_gaiters", name:"Wool Gaiters", price:0.55, invType:"Items", desc:"category: legwear | material: wool | color: gray | warmth: medium | details: snow cuff; burr guard" },
+        { id:"gaiters_spats", name:"Gaiters/Spats", price:0.7, invType:"Items", desc:"category: legwear | material: canvas/leather | color: gray | warmth: light | details: keeps grit from boots" },
+        { id:"spatterdashes_gaiters", name:"Spatterdashes (Gaiters)", price:0.65, invType:"Items", desc:"category: legwear | material: canvas | color: tan | warmth: light | details: mud shield; parade-clean" },
+        { id:"wool_leggings", name:"Wool Leggings", price:0.6, invType:"Items", desc:"category: legwear | material: wool | warmth: medium | details: lace-up; snow brush" },
+        { id:"leather_wrist_cuffs_cowboy_style", name:"Leather Wrist Cuffs (Cowboy Style)", price:0.45, invType:"Items", desc:"category: accessories | material: leather | color: brown | warmth: n/a | details: rope burn guard" },
+        { id:"wide_leather_belt", name:"Wide Leather Belt", price:0.6, invType:"Items", desc:"category: accessories | material: leather | color: brown | warmth: n/a | details: stout buckle; suspenders buttons" },
+        { id:"work_belt_canvas_with_buckle", name:"Work Belt (Canvas with Buckle)", price:0.35, invType:"Items", desc:"category: accessories | material: canvas | color: tan | warmth: n/a | details: tool loops" },
+        { id:"wide_leather_belt_with_cartridge_loops", name:"Wide Leather Belt with Cartridge Loops", price:1.9, invType:"Items", desc:"category: accessories | material: leather | color: brown | warmth: n/a | details: 24 loops; trail-ready" },
+        { id:"cartridge_belt_bandolier", name:"Cartridge Belt & Bandolier", price:2.25, invType:"Items", desc:"category: accessories | material: leather | color: dark brown | warmth: n/a | details: cross-body ammo carry" },
+        { id:"canvas_gun_belt", name:"Canvas Gun Belt", price:1.1, invType:"Items", desc:"category: accessories | material: canvas & leather | color: tan | warmth: n/a | details: holster-ready" },
+        { id:"brass_belt_buckle_us_or_csa", name:"Brass Belt Buckle (“US” or “CSA”)", price:0.75, invType:"Items", desc:"category: accessories | material: brass | color: brass | warmth: n/a | details: unit pride; stout" },
+        { id:"snake_belt_buckle", name:"Snake Belt Buckle", price:1.0, invType:"Items", desc:"category: accessories | material: brass/pewter | color: silvered | warmth: n/a | details: coiled motif; lucky" },
+        { id:"reticule_small_purse", name:"Reticule (Small Purse)", price:1.0, invType:"Items", desc:"category: accessories | material: silk/canvas | warmth: n/a | details: drawstring; ticket pouch" },
+        { id:"garters_with_buckles", name:"Garters with Buckles", price:0.3, invType:"Items", desc:"category: accessories | material: elastic/cotton | color: black | warmth: n/a | details: keeps stockings up" },
+        { id:"mourning_veil_full_length_crepe", name:"Mourning Veil (Full-Length Crepe)", price:1.4, invType:"Items", desc:"category: accessories | material: crepe | color: black | warmth: light | details: chapel long; solemn" },
+        { id:"serape", name:"Serape", price:3.2, invType:"Items", desc:"category: wraps | material: wool | color: serape stripes | warmth: medium | details: desert day/night swing" },
+        { id:"spanish_inspired_serape", name:"Spanish-Inspired Serape", price:3.5, invType:"Items", desc:"category: wraps | material: wool | color: deep red/black | warmth: medium | details: ranchero styling" },
+        { id:"huipil", name:"Huipil", price:1.6, invType:"Items", desc:"category: tops | material: woven cotton | color: embroidered multicolor | warmth: light | details: breathes in heat" },
+        { id:"navajo_woven_blanket", name:"Navajo Woven Blanket", price:6.5, invType:"Items", desc:"category: wraps | material: wool | color: geometric patterns | warmth: heavy | details: saddle & sleep" },
+        { id:"harlequin_mask", name:"Harlequin Mask", price:0.85, invType:"Items", desc:"category: theatrical | material: lacquered papier-mâché | color: motley | warmth: n/a | details: carnival mischief" },
+        { id:"masquerade_mask_venetian_style", name:"Masquerade Mask (Venetian Style)", price:1.1, invType:"Items", desc:"category: theatrical | material: papier-mâché | color: black/gold | warmth: n/a | details: ballroom intrigue" },
+        { id:"plague_doctor_mask_theatrical", name:"Plague Doctor Mask (Theatrical)", price:3.5, invType:"Items", desc:"category: theatrical | material: leather | color: black | warmth: n/a | details: long beak; medicine show draw" },
+        { id:"executioner_s_hood", name:"Executioner’s Hood", price:0.7, invType:"Items", desc:"category: theatrical | material: heavy cotton | color: black | warmth: light | details: full coverage; sinister" },
+        { id:"straitjacket", name:"Straitjacket", price:6.0, invType:"Items", desc:"category: theatrical | material: canvas & leather | color: off-white | warmth: medium | details: stage escapology" },
+        { id:"funeral_shroud", name:"Funeral Shroud", price:0.9, invType:"Items", desc:"category: ceremonial | material: linen | color: white | warmth: n/a | details: solemn winding-sheet" },
+        { id:"shaman_s_feather_cloak", name:"Shaman’s Feather Cloak", price:10.0, invType:"Items", desc:"category: ceremonial | material: feathers & hide | color: multicolor | warmth: light | details: ritual use; handle with respect" },
+        { id:"chaps", name:"Chaps", price:4.0, invType:"Items", desc:"category: riding | material: leather | color: dark brown | warmth: medium | details: brush & thorn guard" },
+        { id:"cowhide_chaps", name:"Cowhide Chaps", price:4.25, invType:"Items", desc:"category: riding | material: cowhide | color: brown | warmth: medium | details: trail-tough; water-shedding" },
+        { id:"shotgun_chaps_straight_legged", name:"Shotgun Chaps (Straight-Legged)", price:4.6, invType:"Items", desc:"category: riding | material: leather | color: black | warmth: medium | details: snug fit; wind cut" },
+        { id:"cowboy_gloves_deerskin", name:"Cowboy Gloves (Deerskin)", price:1.1, invType:"Items", desc:"category: riding | material: deerskin | color: tan | warmth: light | details: rein feel; roping palm" },
+        { id:"cravat_or_neck_tie", name:"Cravat or Neck Tie", price:0.45, invType:"Items", desc:"category: formalwear | material: silk/cotton | warmth: n/a | details: knot to taste" },
+        { id:"embroidered_bodice_2", name:"Embroidered Bodice", price:3.0, invType:"Items", desc:"category: formalwear | material: silk/cotton | warmth: light | details: floral motifs" },
+        { id:"silk_bonnet_with_long_ribbons", name:"Silk Bonnet with Long Ribbons", price:3.1, invType:"Items", desc:"category: formalwear | material: silk | warmth: light | details: walking finery" },
+        { id:"watch_fob_seals", name:"Watch Fob Seals", price:1.2, invType:"Items", desc:"category: formalwear | material: metal & stone | color: assorted | warmth: n/a | details: stamp wax; dandy’s delight" },
+        { id:"chatelaine_chains", name:"Chatelaine Chains", price:1.6, invType:"Items", desc:"category: formalwear | material: plated metal | color: gold/silver | warmth: n/a | details: keys, scissors & scent" },
+        { id:"buffalo_robe_blanket", name:"Buffalo Robe Blanket", price:9.5, invType:"Items", desc:"category: blankets | material: buffalo hide | color: dark brown | warmth: extreme | details: wagon-bed heater" },
+        { id:"spencer_jacket_women_s_short_jacket", name:"Spencer Jacket (Women’s Short Jacket)", price:5.5, invType:"Items", desc:"category: coats | material: wool | warmth: light | details: cropped; high-waist dresses" },
+        { id:"union_army_surplus_jacket", name:"Union Army Surplus Jacket", price:20.0, invType:"Items", desc:"category: surplus | material: wool | color: union blue | warmth: medium | details: brass eagle buttons; surplus discount:" },
+        { id:"surplus_shell_jacket_civil_war", name:"Surplus Shell Jacket (Civil War)", price:20.0, invType:"Items", desc:"category: surplus | material: wool | color: gray or blue | warmth: medium | details: short waist; surplus discount:" },
+        { id:"confederate_kepi", name:"Confederate Kepi", price:20.0, invType:"Items", desc:"category: surplus | material: wool | color: gray | warmth: light | details: leather brim; surplus discount:" },
+        { id:"union_army_forage_cap_military_surplus", name:"Union Army Forage Cap (Military Surplus)", price:20.0, invType:"Items", desc:"category: surplus | material: wool | color: blue | warmth: light | details: low crown; surplus discount:" },
+        { id:"artillery_dress_shako_military_surplus", name:"Artillery Dress Shako (Military Surplus)", price:20.0, invType:"Items", desc:"category: surplus | material: felt/leather | color: black | warmth: light | details: plume socket; surplus discount:" },
+        { id:"navy_sailor_s_cap_military_surplus", name:"Navy Sailor’s Cap (Military Surplus)", price:20.0, invType:"Items", desc:"category: surplus | material: wool | color: navy | warmth: light | details: roll brim; surplus discount:" },
+        { id:"military_dress_uniform_jacket", name:"Military Dress Uniform Jacket", price:20.0, invType:"Items", desc:"category: surplus | material: fine wool | color: dark navy | warmth: medium | details: braid trim; surplus discount:" },
+        { id:"nauvoo_legion_tunic_military_surplus", name:"Nauvoo Legion Tunic (Military Surplus)", price:20.0, invType:"Items", desc:"category: surplus | material: wool | color: dark green | warmth: medium | details: militia cut; surplus discount:" },
+        { id:"homemade_mormon_militia_kepi_deseret_surplus", name:"Homemade Mormon Militia Kepi (Deseret Surplus)", price:20.0, invType:"Items", desc:"category: surplus | material: wool | color: brown | warmth: light | details: hand-stitched; surplus discount:" },
+        { id:"zion_militia_coat_deseret_surplus", name:"Zion Militia Coat (Deseret Surplus)", price:20.0, invType:"Items", desc:"category: surplus | material: wool | color: deep green | warmth: medium | details: frontier issue; surplus discount:" },
+        { id:"beehive_insignia_buckle_deseret_surplus", name:"Beehive Insignia Buckle (Deseret Surplus)", price:20.0, invType:"Items", desc:"category: surplus | material: brass | color: brass | warmth: n/a | details: hive emblem; surplus discount:" },
+        { id:"deseret_cavalry_hat_military_surplus", name:"Deseret Cavalry Hat (Military Surplus)", price:20.0, invType:"Items", desc:"category: surplus | material: felt | color: dark green | warmth: light | details: pinned brim; surplus discount:" },
+        { id:"deseret_cartridge_box_military_surplus", name:"Deseret Cartridge Box (Military Surplus)", price:20.0, invType:"Items", desc:"category: surplus | material: leather | color: black | warmth: n/a | details: flap lid; surplus discount:" },
+        { id:"tabernacle_guard_overcoat_military_surplus", name:"Tabernacle Guard Overcoat (Military Surplus)", price:20.0, invType:"Items", desc:"category: surplus | material: heavy wool | color: charcoal | warmth: heavy | details: shoulder cape; surplus discount:" },
+        { id:"tabernacle_bandolier_deseret_surplus", name:"Tabernacle Bandolier (Deseret Surplus)", price:20.0, invType:"Items", desc:"category: surplus | material: leather | color: brown | warmth: n/a | details: multiple loops; surplus discount:" },
+        { id:"sioux_decorated_union_army_cavalry_jacket_captur", name:"Sioux-Decorated Union Army Cavalry Jacket (Captured Surplus)", price:20.0, invType:"Items", desc:"category: surplus | material: wool with beadwork | color: blue with bead trim | warmth: medium | details: cultural beadwork; surplus discount:" },
+        { id:"sioux_army_surplus_bandolier", name:"Sioux Army Surplus Bandolier", price:20.0, invType:"Items", desc:"category: surplus | material: leather & beadwork | color: brown/multicolor | warmth: n/a | details: beaded strap; surplus discount:" },
+        { id:"ceremonial_eagle_feather_bonnet_surplus", name:"Ceremonial Eagle-Feather Bonnet (Surplus)", price:20.0, invType:"Items", desc:"category: surplus | material: feathers & hide | color: natural | warmth: light | details: ceremonial piece; surplus discount:" },
+        { id:"rawhide_snowshoes_surplus", name:"Rawhide Snowshoes (Surplus)", price:20.0, invType:"Items", desc:"category: surplus | material: wood & rawhide | color: natural | warmth: n/a | details: winter travel; surplus discount:" },
+        { id:"painted_breastplate_surplus", name:"Painted Breastplate (Surplus)", price:20.0, invType:"Items", desc:"category: surplus | material: bone & leather | color: painted | warmth: light | details: ceremonial protection; surplus discount:" },
+        { id:"sioux_rifle_scabbard_surplus", name:"Sioux Rifle Scabbard (Surplus)", price:20.0, invType:"Items", desc:"category: surplus | material: leather & bead | color: brown/multicolor | warmth: n/a | details: saddle mount; surplus discount:" },
+        { id:"buffalo_hide_overcoat_surplus", name:"Buffalo-Hide Overcoat (Surplus)", price:20.0, invType:"Items", desc:"category: surplus | material: buffalo hide | color: dark brown | warmth: heavy | details: storm-proof; surplus discount:" },
+        { id:"wool_tam_cap_scottish_immigrant_style", name:"Wool Tam/Cap (Scottish Immigrant Style)", price:0.7, invType:"Items", desc:"category: headwear | material: wool | warmth: light | details: flat crown; dockside common" },
+        { id:"canvas_gun_belt_2", name:"Canvas Gun Belt", price:1.1, invType:"Items", desc:"category: accessories | material: canvas/leather | color: tan | warmth: n/a | details: holster slots" },
+        { id:"oilskin_hood", name:"Oilskin Hood", price:0.85, invType:"Items", desc:"category: accessories | material: oilskin | warmth: light | details: snaps to coats; rain visor" },
+        { id:"cloth_headscarf_calico_or_wool", name:"Cloth Headscarf (Calico or Wool)", price:0.25, invType:"Items", desc:"category: scarves | material: calico/wool | warmth: light | details: hair & dust cover" },
+        { id:"hemp_rope_suspenders", name:"Hemp Rope Suspenders", price:0.35, invType:"Items", desc:"category: accessories | material: hemp rope & leather tabs | color: tan | warmth: n/a | details: field-made; stout" },
+        { id:"leather_suspenders_plain", name:"Leather Suspenders (Plain)", price:0.55, invType:"Items", desc:"category: accessories | material: leather | color: brown | warmth: n/a | details: button-on; holds broadfalls" },
+        { id:"suspenders", name:"Suspenders", price:0.4, invType:"Items", desc:"category: accessories | material: cotton webbing | color: gray | warmth: n/a | details: nickel adjusters" },
+        { id:"lakota_feathered_headdress", name:"Lakota Feathered Headdress", price:18.0, invType:"Items", desc:"category: ceremonial | material: feathers & leather | color: multicolor | warmth: light | details: ceremonial use; handle with respect" },
+        { id:"human_flesh_widebrim_hat", name:"Human Flesh Widebrim Hat", price:25.0, invType:"Items", desc:"category: oddities | material: (questionable) tanned hide | color: reddish-brown | warmth: light | details: unsettling conversation piece" },
+        { id:"apron_calico_or_lace", name:"Apron (Calico or Lace)", price:0.6, invType:"Items", desc:"category: accessories | material: calico/lace | warmth: n/a | details: keeps flour & soot off" },
+        { id:"s_r_bullet_proof_vest", name:"S&R Bullet Proof Vest", price:60.0, invType:"Items", desc:"category: special | material: layered silk & steel plates | color: black | warmth: medium | details: discreet under-coat protection" },
+      ],
+
+      "Specialized Goods": [
+        { id:"blasting_powder_kegs", name:"Blasting Powder Kegs", price:6.5, invType:"Items", desc:"category: mining | unit: 25 lb keg" },
+        { id:"dynamite_sticks", name:"Dynamite Sticks", price:0.9, invType:"Items", desc:"category: mining | unit: per stick" },
+        { id:"black_powder_blast_cartridges_bundle_of_25", name:"Black Powder Blast Cartridges (Bundle of 25)", price:1.25, invType:"Items", desc:"category: mining" },
+        { id:"safety_fuse_reels_50_ft", name:"Safety Fuse Reels (50 ft)", price:0.5, invType:"Items", desc:"category: mining" },
+        { id:"powder_measure_tamping_rod", name:"Powder Measure & Tamping Rod", price:0.6, invType:"Items", desc:"category: mining" },
+        { id:"leather_blasting_satchel", name:"Leather Blasting Satchel", price:3.0, invType:"Items", desc:"category: mining" },
+        { id:"portable_blasting_machine_magneto", name:"Portable Blasting Machine (Magneto)", price:28.0, invType:"Items", desc:"category: mining" },
+        { id:"hand_steel_star_drill", name:"Hand Steel & Star Drill", price:1.2, invType:"Items", desc:"category: mining" },
+        { id:"hand_crank_rock_drill", name:"Hand-Crank Rock Drill", price:36.0, invType:"Items", desc:"category: mining" },
+        { id:"prospector_s_pan_steel", name:"Prospector’s Pan (Steel)", price:0.75, invType:"Items", desc:"category: prospecting" },
+        { id:"portable_assay_kit", name:"Portable Assay Kit", price:4.5, invType:"Items", desc:"category: prospecting" },
+        { id:"geologist_hammer", name:"Geologist Hammer", price:1.0, invType:"Items", desc:"category: prospecting" },
+        { id:"ore_sacks_dozen", name:"Ore Sacks (Dozen)", price:0.5, invType:"Items", desc:"category: prospecting" },
+        { id:"muslin_sample_bags_dozen", name:"Muslin Sample Bags (Dozen)", price:0.35, invType:"Items", desc:"category: prospecting" },
+        { id:"miner_s_candles_box_of_12", name:"Miner’s Candles (Box of 12)", price:0.25, invType:"Items", desc:"category: lighting" },
+        { id:"oil_wick_cap_lamp", name:"Oil Wick Cap Lamp", price:0.6, invType:"Items", desc:"category: lighting" },
+        { id:"davy_safety_lamp", name:"Davy Safety Lamp", price:3.0, invType:"Items", desc:"category: lighting" },
+        { id:"signal_lantern_red_green_lenses", name:"Signal Lantern (Red/Green Lenses)", price:1.5, invType:"Items", desc:"category: lighting" },
+        { id:"road_lantern_carriage", name:"Road Lantern (Carriage)", price:1.1, invType:"Items", desc:"category: lighting" },
+        { id:"surveyor_s_transit_tripod", name:"Surveyor’s Transit & Tripod", price:40.0, invType:"Items", desc:"category: surveying" },
+        { id:"surveyor_s_compass", name:"Surveyor’s Compass", price:6.5, invType:"Items", desc:"category: surveying" },
+        { id:"measuring_chain_gunter_s_66_ft", name:"Measuring Chain (Gunter’s 66-ft)", price:2.4, invType:"Items", desc:"category: surveying" },
+        { id:"levelling_rod", name:"Levelling Rod", price:1.5, invType:"Items", desc:"category: surveying" },
+        { id:"odometer_wheel", name:"Odometer Wheel", price:3.0, invType:"Items", desc:"category: surveying" },
+        { id:"track_gauge_alignment_bar", name:"Track Gauge & Alignment Bar", price:2.25, invType:"Items", desc:"category: railroad" },
+        { id:"rail_fishplates_bolt_kit", name:"Rail Fishplates & Bolt Kit", price:3.75, invType:"Items", desc:"category: railroad" },
+        { id:"railroad_spike_hammer", name:"Railroad Spike Hammer", price:1.1, invType:"Items", desc:"category: railroad" },
+        { id:"brakeman_s_club", name:"Brakeman’s Club", price:0.9, invType:"Items", desc:"category: railroad" },
+        { id:"telegraph_key_wire_kit", name:"Telegraph Key & Wire Kit", price:8.0, invType:"Items", desc:"category: telegraphy" },
+        { id:"branding_iron_customizable", name:"Branding Iron (Customizable)", price:2.2, invType:"Items", desc:"category: ranch" },
+        { id:"cattle_prod_iron_rod", name:"Cattle Prod (Iron Rod)", price:0.6, invType:"Items", desc:"category: ranch" },
+        { id:"shearing_clippers_hand", name:"Shearing Clippers (Hand)", price:0.85, invType:"Items", desc:"category: ranch" },
+        { id:"fence_post_auger", name:"Fence Post Auger", price:1.1, invType:"Items", desc:"category: ranch" },
+        { id:"barbed_wire_spool", name:"Barbed Wire Spool", price:1.8, invType:"Items", desc:"category: ranch" },
+        { id:"dehorning_saw", name:"Dehorning Saw", price:1.4, invType:"Items", desc:"category: ranch" },
+        { id:"farrier_s_rasp_hoof_knife", name:"Farrier’s Rasp & Hoof Knife", price:0.85, invType:"Items", desc:"category: ranch" },
+        { id:"hay_knife", name:"Hay Knife", price:0.65, invType:"Items", desc:"category: ranch" },
+        { id:"saddle_working_2", name:"Saddle (Working)", price:18.0, invType:"Items", desc:"category: tack" },
+        { id:"harness_team", name:"Harness (Team)", price:12.0, invType:"Items", desc:"category: tack" },
+        { id:"crosscut_whip_saw_5_6_ft", name:"Crosscut Whip Saw (5–6 ft)", price:4.5, invType:"Items", desc:"category: logging" },
+        { id:"timber_tongs", name:"Timber Tongs", price:2.25, invType:"Items", desc:"category: logging" },
+        { id:"hand_winch_bucket", name:"Hand Winch & Bucket", price:3.2, invType:"Items", desc:"category: logging" },
+        { id:"pickaxe", name:"Pickaxe", price:1.2, invType:"Items", desc:"category: tools" },
+        { id:"collapsible_shovel_pick", name:"Collapsible Shovel & Pick", price:1.6, invType:"Items", desc:"category: tools" },
+        { id:"hammer", name:"Hammer", price:0.5, invType:"Items", desc:"category: tools" },
+        { id:"axe_felling", name:"Axe (Felling)", price:1.25, invType:"Items", desc:"category: tools" },
+        { id:"haversack_canvas", name:"Haversack (Canvas)", price:0.85, invType:"Items", desc:"category: carry" },
+        { id:"field_satchel", name:"Field Satchel", price:1.1, invType:"Items", desc:"category: carry" },
+        { id:"coal_scuttle_bucket", name:"Coal Scuttle (Bucket)", price:0.4, invType:"Items", desc:"category: supplies" },
+        { id:"coal_1_lb", name:"Coal, 1 lb", price:0.02, invType:"Items", desc:"category: supplies" },
+        { id:"wheat_1_lb", name:"Wheat, 1 lb", price:0.03, invType:"Items", desc:"category: supplies" },
+        { id:"phosphorous_matches_box", name:"Phosphorous Matches (Box)", price:0.05, invType:"Items", desc:"category: supplies" },
+        { id:"waterproof_notebook", name:"Waterproof Notebook", price:0.25, invType:"Items", desc:"category: supplies" },
+        { id:"steel_traps_small_wolf_bear", name:"Steel Traps (Small→Wolf/Bear)", price:0.8, invType:"Items", desc:"category: hunting" },
+        { id:"bear_trap_heavy", name:"Bear Trap (Heavy)", price:8.5, invType:"Items", desc:"category: hunting" },
+        { id:"fleshing_knife", name:"Fleshing Knife", price:0.7, invType:"Items", desc:"category: hunting" },
+        { id:"scent_lure_kit", name:"Scent Lure Kit", price:0.5, invType:"Items", desc:"category: hunting" },
+        { id:"powder_flask_capper", name:"Powder Flask & Capper", price:0.75, invType:"Items", desc:"category: hunting" },
+        { id:"powder_horn", name:"Powder Horn", price:0.8, invType:"Items", desc:"category: hunting" },
+        { id:"surgeon_s_kit", name:"Surgeon’s Kit", price:12.0, invType:"Items", desc:"category: medical" },
+        { id:"field_kit_first_aid", name:"Field Kit (First Aid)", price:2.25, invType:"Items", desc:"category: medical" },
+        { id:"wilderness_first_aid_kit", name:"Wilderness First Aid Kit", price:1.8, invType:"Items", desc:"category: medical" },
+        { id:"snakebite_kit", name:"Snakebite Kit", price:0.9, invType:"Items", desc:"category: medical" },
+        { id:"amputation_saw", name:"Amputation Saw", price:3.25, invType:"Items", desc:"category: medical" },
+        { id:"bone_saw_heavy", name:"Bone Saw (Heavy)", price:2.5, invType:"Items", desc:"category: medical" },
+        { id:"rib_spreader", name:"Rib Spreader", price:1.8, invType:"Items", desc:"category: medical" },
+        { id:"bloodletting_lancet_set", name:"Bloodletting Lancet Set", price:0.6, invType:"Items", desc:"category: medical" },
+        { id:"respirator_cloth_charcoal", name:"Respirator (Cloth & Charcoal)", price:1.2, invType:"Items", desc:"category: medical" },
+        { id:"opium_vial_syringe", name:"Opium Vial & Syringe", price:2.1, invType:"Items", desc:"category: medical" },
+        { id:"opium_smoking_kit", name:"Opium Smoking Kit", price:3.0, invType:"Items", desc:"category: medical" },
+        { id:"collapsible_camp_stove_sheet_iron", name:"Collapsible Camp Stove (Sheet Iron)", price:2.6, invType:"Items", desc:"category: camp" },
+        { id:"cooking_pot_1_qt", name:"Cooking Pot (1-qt)", price:0.3, invType:"Items", desc:"category: camp" },
+        { id:"fry_pan_8_in", name:"Fry Pan (8 in)", price:0.25, invType:"Items", desc:"category: camp" },
+        { id:"entrenching_spade", name:"Entrenching Spade", price:0.9, invType:"Items", desc:"category: camp" },
+        { id:"water_purification_still_portable", name:"Water Purification Still (Portable)", price:8.0, invType:"Items", desc:"category: camp" },
+        { id:"snowshoes_rawhide_wood", name:"Snowshoes (Rawhide & Wood)", price:2.8, invType:"Items", desc:"category: travel" },
+        { id:"spyglass_brass_3_draw", name:"Spyglass (Brass, 3-Draw)", price:10.0, invType:"Items", desc:"category: travel" },
+        { id:"canoe_birchbark", name:"Canoe (Birchbark)", price:22.0, invType:"Items", desc:"category: travel" },
+        { id:"kayak_skin_on_frame", name:"Kayak (Skin-on-Frame)", price:28.0, invType:"Items", desc:"category: travel" },
+        { id:"fishing_rod_ash_brass", name:"Fishing Rod (Ash & Brass)", price:0.85, invType:"Items", desc:"category: angling" },
+        { id:"fishing_tackle_tin_assortment", name:"Fishing Tackle (Tin Assortment)", price:0.6, invType:"Items", desc:"category: angling" },
+        { id:"fishing_kit", name:"Fishing Kit", price:1.75, invType:"Items", desc:"category: angling" },
+        { id:"crab_trap_wire_basket", name:"Crab Trap (Wire Basket)", price:0.9, invType:"Items", desc:"category: angling" },
+        { id:"bullet_mold_caliber_of_choice", name:"Bullet Mold (Caliber of Choice)", price:0.6, invType:"Items", desc:"category: munitions" },
+        { id:"odometer_wheel_2", name:"Odometer Wheel", price:3.0, invType:"Items", desc:"category: surveying" },
+        { id:"surveyor_s_transit_tripod_spare_listing", name:"Surveyor’s Transit & Tripod (Spare Listing)", price:40.0, invType:"Items", desc:"category: surveying" },
+        { id:"ghost_rock_1_lb", name:"Ghost Rock (1 lb)", price:120.0, invType:"Items", desc:"category: alchemy" },
+      ]
+    };
+
+    /********************************************************************
+     * INITIAL INVENTORY (pre-seeded as requested; does NOT cost money)
+     ********************************************************************/
+    let nextInvId = 1;
+    const inventory = [];
+
+    /********************************************************************
+     * STATE
+     ********************************************************************/
+    let cash = 100.00;
+    let limitEnabled = true;
+    let currentCategory = null;
+    let featuredPick = []; // current random 10
+
+    /********************************************************************
+     * UTIL
+     ********************************************************************/
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => [...root.querySelectorAll(sel)];
+    const fmt = v => "$" + v.toFixed(2);
+    const pickN = (arr, n) => {
+      const copy = [...arr];
+      const out = [];
+      while (copy.length && out.length < n) {
+        out.push(copy.splice(Math.floor(Math.random()*copy.length), 1)[0]);
+      }
+      return out;
+    };
+
+    /********************************************************************
+     * NAV
+     ********************************************************************/
+    function openNav(){ const s=$("#navSidebar"); s.style.width="250px"; s.setAttribute("aria-hidden","false"); }
+    function closeNav(){ const s=$("#navSidebar"); s.style.width="0"; s.setAttribute("aria-hidden","true"); }
+
+    /********************************************************************
+     * CASH / LIMIT
+     ********************************************************************/
+    function renderCash(){
+      $("#cashAmt").textContent = fmt(cash);
+      const badge = $("#limitBadge");
+      badge.textContent = "Limit: " + (limitEnabled ? "ON" : "OFF");
+      badge.className = "badge " + (limitEnabled ? "limit-on" : "limit-off");
+      $("#toggleLimit").textContent = limitEnabled ? "Disable Money Limit" : "Enable Money Limit";
+      // Update buy button disabled state in visible lists
+      updateBuyButtonStates();
+    }
+    $("#toggleLimit").addEventListener("click", ()=>{
+      limitEnabled = !limitEnabled;
+      renderCash();
+    });
+
+    function canAfford(price) {
+      return !limitEnabled || (cash - price >= 0);
+    }
+
+    function pay(price){
+      cash -= price;
+      renderCash();
+    }
+
+    function refund(price){
+      cash += price;
+      renderCash();
+    }
+
+    /********************************************************************
+     * CATEGORY UI
+     ********************************************************************/
+    function buildCategoryStrip(){
+      const holder = $("#catStrip");
+      holder.innerHTML = "";
+      CATEGORIES.forEach(cat=>{
+        const b = document.createElement("button");
+        b.className = "cat-btn";
+        b.textContent = cat;
+        b.onclick = ()=>selectCategory(cat);
+        holder.appendChild(b);
+      });
+    }
+
+    function setActiveCatButton(cat){
+      $$(".cat-btn").forEach(btn=>{
+        btn.classList.toggle("active", btn.textContent === cat);
+      });
+    }
+
+    function selectCategory(cat){
+      currentCategory = cat;
+      setActiveCatButton(cat);
+      $("#catTitle").textContent = cat;
+      $("#categoryPanel").style.display = "block";
+      regenerateFeatured();
+      $("#allWrap").style.display = "none";
+      $("#btnToggleAll").textContent = "Show All Items";
+    }
+
+    function regenerateFeatured(){
+      const list = CATALOG[currentCategory] || [];
+      featuredPick = pickN(list, Math.min(10, list.length));
+      renderItems("#featuredGrid", featuredPick);
+      // Also refresh the full list panel (hidden until toggled)
+      renderItems("#allGrid", list);
+    }
+
+    $("#btnRegen").addEventListener("click", regenerateFeatured);
+
+    $("#btnToggleAll").addEventListener("click", ()=>{
+      const wrap = $("#allWrap");
+      const open = wrap.style.display === "block";
+      wrap.style.display = open ? "none" : "block";
+      $("#btnToggleAll").textContent = open ? "Show All Items" : "Hide All Items";
+    });
+
+    function renderItems(sel, items){
+      const grid = $(sel);
+      grid.innerHTML = "";
+      items.forEach(item=>{
+        grid.appendChild(itemCard(item));
+      });
+      updateBuyButtonStates();
+    }
+
+    function itemCard(item){
+      const div = document.createElement("div");
+      div.className = "item-card";
+      const top = document.createElement("div");
+      top.className = "item-top";
+      const name = document.createElement("div");
+      name.className = "item-name";
+      name.textContent = item.name;
+      const price = document.createElement("div");
+      price.className = "item-price";
+      price.textContent = item.kit ? fmt(item.price) + " (kit)" : fmt(item.price);
+      top.appendChild(name); top.appendChild(price);
+
+      const desc = document.createElement("div");
+      desc.className = "item-desc";
+      desc.textContent = item.kit ? "Starter kit: adds multiple items to your inventory" : (item.desc || "");
+
+      const buy = document.createElement("button");
+      buy.className = "btn";
+      buy.textContent = item.kit ? "Buy Kit" : "Buy";
+      buy.dataset.price = item.price;
+      buy.onclick = ()=>handleBuy(item);
+
+      div.appendChild(top);
+      if (desc.textContent) div.appendChild(desc);
+      div.appendChild(buy);
+      return div;
+    }
+
+    function updateBuyButtonStates(){
+      // Disable buy buttons that exceed funds when limit is ON
+      $$("button.btn").forEach(btn=>{
+        if (!btn.textContent.startsWith("Buy")) return;
+        const price = parseFloat(btn.dataset.price);
+        if (isNaN(price)) return;
+        btn.disabled = limitEnabled && !canAfford(price);
+      });
+    }
+
+    /********************************************************************
+     * PURCHASE / RETURN
+     ********************************************************************/
+    function handleBuy(item){
+      if (item.kit){
+        // price equals sum(contents.price); deduct once then add contents with their own pricePaid (for fair returns)
+        if (!canAfford(item.price)) return;
+        pay(item.price);
+        item.contents.forEach(c => {
+          addToInventory(c, c.price);
+        });
+      } else {
+        if (!canAfford(item.price)) return;
+        pay(item.price);
+        addToInventory(item, item.price);
+      }
+      renderInventory();
+    }
+
+    function addToInventory(src, pricePaid){
+      inventory.push({
+        _id: nextInvId++,
+        name: src.name,
+        invType: src.invType || "Items",
+        desc: src.desc || null,
+        pricePaid: Number(pricePaid || 0),
+        copyName: src.copyName || null
+      });
+    }
+
+    function returnItem(id){
+      const idx = inventory.findIndex(x=>x._id === id);
+      if (idx === -1) return;
+      const item = inventory[idx];
+      refund(item.pricePaid || 0);
+      inventory.splice(idx,1);
+      renderInventory();
+    }
+
+    /********************************************************************
+     * INVENTORY RENDER + COPY
+     ********************************************************************/
+    function renderInventory(){
+      const groups = { Weapons:[], Ammo:[], Items:[] };
+      inventory.forEach(it=>{
+        (groups[it.invType] || groups.Items).push(it);
+      });
+
+      const mount = (sel, arr) => {
+        const root = $(sel);
+        root.innerHTML = "";
+        if (!arr.length){
+          const empty = document.createElement("div");
+          empty.className = "muted";
+          empty.textContent = "(empty)";
+          root.appendChild(empty);
+          return;
+        }
+        arr.forEach(it=>{
+          const row = document.createElement("div");
+          row.className = "inv-item";
+          const left = document.createElement("div");
+          const nm = it.copyName || it.name;
+          left.innerHTML = `<span class="monospace">\`${nm}\`</span>` + (it.desc ? ` <span class="muted">*( ${it.desc} )*</span>` : "");
+          const right = document.createElement("div");
+          const price = document.createElement("span");
+          price.className = "muted";
+          price.textContent = it.pricePaid ? fmt(it.pricePaid) : "";
+          const btn = document.createElement("button");
+          btn.className = "btn"; btn.style.marginLeft = "8px";
+          btn.textContent = "Return";
+          btn.onclick = ()=>returnItem(it._id);
+          right.appendChild(price); right.appendChild(btn);
+          row.appendChild(left); row.appendChild(right);
+          root.appendChild(row);
+        });
+      };
+
+      mount("#invWeapons", groups.Weapons);
+      mount("#invAmmo", groups.Ammo);
+      mount("#invItems", groups.Items);
+    }
+
+    function copyInventory(){
+      // Build text in your requested format
+      const groups = { Weapons:[], Ammo:[], Items:[] };
+      inventory.forEach(it => (groups[it.invType] || groups.Items).push(it));
+
+      const fmtLine = it => {
+        const nm = it.copyName || it.name;
+        return it.desc
+          ? `\`${nm}\` *( ${it.desc} )*`
+          : `\`${nm}\``;
+      };
+
+      let text = `**Inventory:**\n`;
+      text += `Weapons:\n`;
+      text += (groups.Weapons.length ? groups.Weapons.map(fmtLine).join("\n") : "").trim() + "\n";
+      text += `Ammo:\n`;
+      text += (groups.Ammo.length ? groups.Ammo.map(fmtLine).join("\n") : "").trim() + "\n";
+      text += `Items:\n`;
+      text += (groups.Items.length ? groups.Items.map(fmtLine).join("\n") : "").trim();
+
+      navigator.clipboard.writeText(text).then(()=>alert("Inventory copied!"));
+    }
+    $("#btnCopyInv").addEventListener("click", copyInventory);
+
+    /********************************************************************
+     * INIT
+     ********************************************************************/
+    buildCategoryStrip();
+    renderCash();
+    seedInitialInventory();
+    renderInventory();
+    // Default to first category open
+    selectCategory(CATEGORIES[0]);
+  </script>
+</body>
+</html>

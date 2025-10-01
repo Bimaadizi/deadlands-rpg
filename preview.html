@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Live HTML Previewer</title>
+  <style>
+    body {
+      display: flex;
+      height: 100vh;
+      margin: 0;
+      font-family: sans-serif;
+      background: #f4f4f4;
+    }
+    #editor-panel {
+      width: 40%;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      background: #222;
+      color: #eee;
+    }
+    textarea {
+      flex: 1;
+      background: #111;
+      color: #eee;
+      border: none;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 14px;
+      resize: none;
+    }
+    #controls {
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+      display: flex;
+      gap: 5px;
+    }
+    button {
+      padding: 5px 8px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    #preview {
+      flex: 1;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #frame {
+      width: 80%;
+      aspect-ratio: 16 / 9;
+      border: 1px solid #ccc;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      background: white;
+    }
+  </style>
+</head>
+<body>
+  <div id="editor-panel">
+    <div id="controls">
+      <button onclick="wrapSelection('<b>', '</b>')"><b>B</b></button>
+      <button onclick="wrapSelection('<i>', '</i>')"><i>I</i></button>
+      <button onclick="wrapSelection('<h2>', '</h2>')">H2</button>
+      <button onclick="wrapSelection('<h3>', '</h3>')">H3</button>
+      <button onclick="insertLink()">Link</button>
+      <button onclick="insertColor()">Color</button>
+      <button onclick="insertParagraph()">&lt;p&gt;</button>
+      <button onclick="copyCode()">Copy Code</button>
+    </div>
+    <textarea id="editor" placeholder="Type your content here..."></textarea>
+  </div>
+  <div id="preview">
+    <iframe id="frame"></iframe>
+  </div>
+
+  <script>
+    const editor = document.getElementById("editor");
+    const frame = document.getElementById("frame");
+
+    function updatePreview() {
+      const raw = editor.value;
+
+      // Replace line breaks with <br> unless already valid HTML
+      const formatted = raw
+        .split("\n")
+        .map(line => line.trim().startsWith("<") ? line : line + "<br>")
+        .join("\n");
+
+      frame.srcdoc = formatted;
+      return formatted; // also return for copyCode use
+    }
+
+    editor.addEventListener("input", updatePreview);
+
+    function wrapSelection(before, after) {
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      const selected = editor.value.substring(start, end);
+      const newText = editor.value.substring(0, start) + before + selected + after + editor.value.substring(end);
+      editor.value = newText;
+      updatePreview();
+    }
+
+    function insertParagraph() {
+      insertAtCursor("<p></p>");
+    }
+
+    function insertLink() {
+      const url = prompt("Enter URL:");
+      if (url) {
+        wrapSelection(`<a href="${url}" target="_blank">`, "</a>");
+      }
+    }
+
+    function insertColor() {
+      const color = prompt("Enter color (e.g. red or #ff0000):");
+      if (color) {
+        wrapSelection(`<span style="color:${color}">`, "</span>");
+      }
+    }
+
+    function insertAtCursor(text) {
+      const cursorPos = editor.selectionStart;
+      const value = editor.value;
+      editor.value = value.substring(0, cursorPos) + text + value.substring(cursorPos);
+      editor.focus();
+      updatePreview();
+    }
+
+    function copyCode() {
+      const formatted = updatePreview();
+      navigator.clipboard.writeText(formatted)
+        .then(() => alert("Formatted HTML copied!"))
+        .catch(err => alert("Copy failed: " + err));
+    }
+
+    updatePreview();
+  </script>
+</body>
+</html>

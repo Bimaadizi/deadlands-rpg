@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deadlands RPG</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: Arial, sans-serif;
+      color: white;
+      background: black url('background.png') no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    .overlay {
+      background-color: rgba(0, 0, 0, 0.6);
+      height: 100%;
+      width: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+
+    .logo {
+      display: block;
+      margin: 0px auto;
+      max-width: 800px;
+    }
+
+    .content {
+      max-width: 900px;
+      margin: auto;
+      padding: 0 50px;
+    }
+
+    @media (max-width: 768px) {
+      .content {
+        padding: 0 15px;
+      }
+    }
+
+    /* Sidebar */
+    .sidebar {
+      height: 100%;
+      width: 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background-color: #111;
+      overflow-x: hidden;
+      transition: 0.3s;
+      padding-top: 60px;
+    }
+
+    .sidebar a {
+      display: block;
+      padding: 10px 20px;
+      text-decoration: none;
+      color: white;
+    }
+
+    .sidebar a:hover {
+      background-color: #333;
+    }
+
+    .sidebar .closebtn {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 25px;
+      cursor: pointer;
+    }
+
+    .openbtn {
+      font-size: 20px;
+      cursor: pointer;
+      background: #111;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+    }
+
+    /* Dropdowns */
+    .dropdown {
+      border: 1px solid white;
+      margin: 20px 0;
+    }
+
+    .dropdown-header {
+      background: #222;
+      padding: 10px;
+      cursor: pointer;
+    }
+
+    .dropdown-content {
+      display: none;
+      padding: 10px;
+      background: #333;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+    }
+
+    .dropdown-content .description {
+      margin: 10px 0;
+    }
+
+    .version-btns {
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .version-btns button {
+      background: #111;
+      color: white;
+      border: 1px solid white;
+      padding: 5px 10px;
+      cursor: pointer;
+      margin: 3px;
+    }
+
+    .copy-btn {
+      background: #111;
+      color: white;
+      border: 1px solid white;
+      padding: 5px 10px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    /* Fix long <pre> content */
+    .content-text {
+      white-space: pre-wrap;   /* preserve formatting but allow wrapping */
+      word-wrap: break-word;
+      overflow-x: auto;        /* allow horizontal scroll if needed */
+      max-width: 100%;
+	  font-size: 10px
+    }
+	
+			  .deadlands-btn {
+    display: block;
+    margin: 10px;
+    padding: 10px 15px;
+    background-color: #824c29; /* Discord purple */
+    color: white;
+    text-align: center;
+    border-radius: 8px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+
+  .deadlands-btn:hover {
+    background-color: #5f3316; /* Slightly darker hover */
+  }
+	  .discord-btn {
+    display: block;
+    margin: 10px;
+    padding: 10px 15px;
+    background-color: #5865F2; /* Discord purple */
+    color: white;
+    text-align: center;
+    border-radius: 8px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+
+  .discord-btn:hover {
+    background-color: #4752c4; /* Slightly darker hover */
+  }
+  
+  
+    .forgotten-realms-btn {
+    display: block;
+    margin: 10px;
+    padding: 10px 15px;
+    background-color: #8B0000; /* Dark red */
+    color: white;
+    text-align: center;
+    border-radius: 8px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+
+  .forgotten-realms-btn:hover {
+    background-color: #5c0000; /* Darker red on hover */
+  }
+	
+	
+	     .Sanguis-btn {
+    display: block;
+    margin: 10px;
+    padding: 10px 15px;
+    background-color: black; /* Dark red */
+    color: white;
+    text-align: center;
+    border-radius: 8px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+
+  .Sanguis-btn:hover {
+    background-color: #5c0000; /* Darker red on hover */
+  }
+
+  </style>
+</head>
+<body>
+  <div class="overlay"></div>
+
+  <button class="openbtn" onclick="openSidebar()">☰ Menu</button>
+
+<div id="mySidebar" class="sidebar">
+  <span class="closebtn" onclick="closeSidebar()">×</span>
+  <a href="index.html">Home</a>
+  <a href="guide.html">Deadlands: Custodial Edition Intro</a>
+  <a href="generator.html">Character Idea Generator</a>
+  <a href="builder.html">Character/Stat Builder</a>
+  <a href="shop.html">Inventory Helper/Shop</a>
+  <br><br><br>
+  <a href="https://discord.gg/yMx6j79yez" target="_blank" class="discord-btn">Discord</a>
+    <a href="https://janitorai.com/characters/6af72b1b-d44f-4966-845f-67a2ff20adfe_character-%E2%98%A0%EF%B8%8E%EF%B8%8E-deadlands-rpg-%F0%9F%82%A1" target="_blank" class="deadlands-btn">Deadlands RPG on Janitor AI</a>
+
+<p> More Modules: </p>
+    <a href="https://bimaadizi.github.io/Forgotten-Realms-RPG/" target="_blank" class="forgotten-realms-btn">DnD/RPG Prompts</a>
+
+    <a href="https://bimaadizi.github.io/Sanguis/" target="_blank" class="Sanguis-btn">Vampire Prompts</a>
+
+</div>
+  <img src="logo.png" alt="Logo" class="logo">
+
+  <div class="content">
+<p>Ladies, gentlemen, what have yous, welcome to Deadlands RPG. This is meant to be a quick introduction to the various features made use of here. This will not cover any lore just simply the mechanics and features.</p>
+<p>'Deadlands: Custodial Edition' is a version of Deadlands RPG rules, being a mix of classic and reloaded edition mechanics. It does differ from these two editions though! Simplifying mechanics to make it easier for the AI to make use of as well as to save on tokens.</p>
+<p>Let's begin by discussing the three offered versions<br> </p>
+<ul>
+<li> Deadlands: Custodial Edition (Manual) </li>
+<li> Deadlands: Custodial Edition (Automatic) </li>
+<li> Deadlands: Dungeons & Varmints Edition </li>
+</ul>
+<p> <b>Manual</b> means you have to do all of the dice rolling and card playing yourself - not the AI. This is because the AI can't do randomness unless it has external integration to do so. Now, Automatic CAN do randomness because Janitor's scripts allow us to have that external (Javascript) integration. Unfortunately, the AI (at least Deepseek 3.1 Reasoning) does not handle it well.  </p>
+<p>You might find the idea of doing all of it yourself intimading and sluggish — And it is <b>IF</b> you do not use the Chrome Extension. This bot features a Chrome Extension which, if parses your page and makes working through tons of combat draws, dice rolls, quickness rolls, engaging and snappy. This is the preferred way to enjoy this bot.</p>
+<p><b>Automatic</b> makes use of scripts, allowing you to generate truly random deck draws and dice rolls. This sounds great on the surface, but there's a huge caveat. While Manual is almost perfect at integrating rolls and draws where necessary, the automatic system prompt over-thinks and makes errors because of it in the implementation. The automatic system prompt needs validation checks at every turn otherwise it will become unreliable and not make random draws. it struggles with locating where the draws and rolls are located in the scenario.</p>
+<p> Automatic also REQUIRES a reasoning model, otherwise, it will not work. It is too complex for non-reasoning models. And if you are using a reasoning model, combat rolls will be EXTREMELY SLOW !! taking minutes for a response. It's for this reason I recommend manual, but this option exists for those of you who, for very valid reasons, do not trust random chrome extensions but would still want to experience the bot's mechanics </p>
+<p> <b>Dungeons & Varmints</b> are for those of you who want to experience the setting, but prefer a more DnD style gameplay, utilizing DnD mechanics instead of Deadland's mechanics. This version strips all Deadlands mechanics and replaces them with DnD mechanics. I would personally recommend trying to engage in the Deadlands mechanics if either of the two system prompts above seem viable to you. </p>
+
+
+<p> <b>Dungeons & Varmints</b> are for those of you who want to experience the setting, but prefer a more DnD style gameplay, utilizing DnD mechanics instead of Deadland's mechanics. This version strips all Deadlands mechanics and replaces them with DnD mechanics. I would personally recommend trying to engage in the Deadlands mechanics if either of the two system prompts above seem viable to you. </p>
+<br><br>
+<h3> Deadlands: Custodial Edition Mechanics </h3>
+<p> Now here's where we get into the mechanics added in Deadlands, and how to make use of them. </p>
+<ul> Traits/Stats </ul>
+<p> If you've played Deadlands Classic or Reloaded, this might seem a bit different. I've kept the 10 core stats, but for the purposes of it being AI truncated the various aptitudes. This saves on tokens and makes it easier for the AI to deploy consistently </p>
+<p> These are the core traits of Deadlands:</p>
+<p> <b>Corporeal:</b> </p>
+<p><b>Deftness</b> This is your hand-eye co-ordination, your shooting, and your fine motor skills. <p>
+<p><b>Nimbleness</b> This is your climbing, dodging, sneaking skills.<p>
+<p><b>Quickness</b> This is your reflex speed, running speed, and used for quickness rolls.<p>
+<p><b>Strength</b> This is your raw physical power, lifting, prying, bare knuckle fighting. <p>
+<p><b>Vigor</b> This is your stamina, toughness, and constitution. <p>
+<br>
+<p> <b>Mental:</b> </p>
+<p><b>Cognition</b> This is your ability for perception, situational awareness, scrutinizing, and analyzing.<p>
+<p><b>Knowledge</b> This is your book learning, academia, science, math, all that.<p>
+<p><b>Mien</b> This is your personal looks, charm, for bluffing, persuasion, leadership.<p>
+<p><b>Smarts</b> This is your reasoning skills, problem-solving skills, and tinkering. <p>
+<p><b>Spirit</b> This is your faith, willpower, religion. <p>
+<p> Each skill of yours has an XdY, X is the number of die you roll, more die=more consistency. The Y is the amount of sides on the die, and represents your potential power.</p>
+<p> The game will (should !) implement skill checks when relevant, it will feature a TN (like DC in DnD) and is the minimum you need to succeed. When doing a skill check, your die will explode. If you roll a 6 on a 1d6, you get to roll again and add that to your initial roll. Each raise (5 over TN) indicates a bigger success. </p>
+<p> Your traits are chosen based on your draws, see the Character Builder section of this website to see more and easily assemble your own character. </p>
+
+<ul> Dice </ul>
+<p> In Deadlands, most of your die are exploding, meaning you hit the max you can roll on that die, you can roll again and add it to your total. When you roll 5 or more over the TN, that indicates better results. For Quickness rolls it can give you another action, for skill checks it can indicate better results, and for huckstering it can increase your hand size. If you're rolling for Deftness, and your deftness is 3d6 vs a TN of 5, and you roll 2, 4, and 6, then you will take the highest roll (6) and since it's a 6 you can roll again one more die. If it's another 6, you can roll it again, let's say it's a 4. Your new final result is 6+4 which is 10! And that's 5 over TN, leading to a raise (better results.) </p>
+
+<p> Dice are used in a few locations. suck as your Quickness (initiative) rolls, skill checks, hex rolls, hit rolls, and damage rolls. Often times, such as Quickness and Hex rolls, this roll is followed up by the Cards mechanic and your performance on the dice rolls bring advantages in the succeeding deck roll. </p>
+
+<p>NOTE: If you're using manual, the AI might slightly mess up the parseable. here's an example of a parseable which can be picked up by the extension: </p>
+<p> [[Roll | Name: ⭐ Belle's Initiative | Die: 3d10 | Type: Exploding | Mod +0 | TN: 5 | For: User]] </p>
+<p> [[Quickness Roll | Name: Belle's Initiative | Die: 3d10 | Type: Exploding | Mod +0 | TN: 5 | For: User]] (Quickness uses special mechanics in the extension, but other traits are not valid at the start)
+<p> Here are examples of incorrect rolls:</p>
+<p> [[⭐ Roll | Name: Belle's Initiative | Die: 3d10 | Type: Exploding | Mod +0 | TN: 5 | For: User]]
+<p> [[Strength Roll | Name: ⭐ Belle's Initiative | Die: 3d10 | Type: Exploding | Mod +0 | TN: 5 | For: User]] </p>
+<p> These are pretty easy to fix, just ensure the star is in the name section and the stat is not in the start of the parseable. </p>
+<ul> Deck </ul>
+
+<p> Deadlands also institutes a very unique deck mechanic, which is used for quickness draws, hex draws, and mini-game features. For Quickness Draws, it determines the order of your move (A K Q J 10 9 8  etc. Higher>Lower, draws broken by Spades > Hearts > Diamonds > Clubs). For Huckstering, you're provided a minimum hand, you must reach the minimum hand or else your spell fails, and you will face backlash from the Manitous. </p>
+
+<ul> Bounty Points </ul>
+
+<p> Bounty Points are Deadland's meta economy and progression system. You will gain 1-3 bounty points for accomplishments during a campaign, completing side quests, major quests, huge developments, or trading in fate chips. These can be exchanged in the Manitou shop (!metaeconomy) to increase your skills/traits die and the # of die, you can also exchange them to soak wounds (though fate die are optimal for this purpose), manitou cards, hexes and tricks.</p>
+<p> Run !metaeconomy to access the meta-economy of the game and purchase bounty points
+
+<ul> Fate Chips </ul>
+
+<p> There are meant to be a few ways to gain fatechips, playing into your weaknesses, rare treasure, pity, but unfortunately the AI doesn't seem to consider it as much as it should. In classic Deadlands, you gain three fate chips at the start, and three at the start of each session (randomly drawn). You can simulate this mechanic by running !newsession when you return to play the bot again to draw 3 fate chips.</p>
+<br><br><br>
+<br><br><br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <script>
+    function openSidebar() {
+      document.getElementById("mySidebar").style.width = "250px";
+    }
+
+    function closeSidebar() {
+      document.getElementById("mySidebar").style.width = "0";
+    }
+
+    function toggleDropdown(header) {
+      const content = header.nextElementSibling;
+      content.style.display = content.style.display === "block" ? "none" : "block";
+    }
+
+    function copyContent(btn) {
+      const text = btn.parentElement.querySelector(".content-text").innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Copied to clipboard!");
+      });
+    }
+
+function switchVersion(btn, versionIndex) {
+  const parent = btn.closest(".dropdown-content");
+  const versions = parent.querySelectorAll(".version");
+
+  versions.forEach((v, i) => {
+    if (i === versionIndex) {
+      v.style.display = "block";
+      v.classList.add("active");
+    } else {
+      v.style.display = "none";
+      v.classList.remove("active");
+    }
+  });
+}
+
+  </script>
+</body>
+</html>

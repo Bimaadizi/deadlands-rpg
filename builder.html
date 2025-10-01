@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Deadlands Character Builder</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: Arial, sans-serif;
+      color: white;
+      background: black url('background.png') no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    .overlay {
+      background-color: rgba(0,0,0,0.6);
+      height:100%;
+      width:100%;
+      position:absolute;
+      top:0;
+      left:0;
+      z-index:-1;
+    }
+
+    .content {
+      max-width:1100px;
+      margin:auto;
+      padding:20px;
+    }
+
+    h1,h2 { margin-top:0; }
+
+    button {
+      background:#222;
+      color:white;
+      border:1px solid white;
+      padding:8px 15px;
+      cursor:pointer;
+      margin:5px 0;
+    }
+
+    /* === Sidebar (matched to second site) === */
+    .sidebar {
+      height: 100%;
+      width: 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background-color: #111;
+      overflow-x: hidden;
+      transition: 0.3s;
+      padding-top: 60px;
+      z-index: 100; /* keep above content */
+    }
+    .sidebar a {
+      display: block;
+      padding: 10px 20px;
+      text-decoration: none;
+      color: white;
+    }
+    .sidebar a:hover { background:#333; }
+    .sidebar .closebtn {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 25px;
+      cursor: pointer;
+    }
+    .openbtn {
+      font-size:20px;
+      cursor:pointer;
+      background:#111;
+      color:white;
+      border:none;
+      padding:10px 15px;
+      margin:10px;
+    }
+
+    /* Sidebar CTA button styles copied to match second site */
+    .discord-btn, .deadlands-btn, .forgotten-realms-btn, .Sanguis-btn {
+      display: block;
+      margin: 10px 20px;
+      padding: 10px 15px;
+      color: white;
+      text-align: center;
+      border-radius: 8px;
+      font-weight: bold;
+      text-decoration: none;
+      transition: background 0.2s ease;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .discord-btn { background-color: #5865F2; }
+    .discord-btn:hover { background-color: #4752c4; }
+    .deadlands-btn { background-color: #824c29; }
+    .deadlands-btn:hover { background-color: #5f3316; }
+    .forgotten-realms-btn { background-color: #8B0000; }
+    .forgotten-realms-btn:hover { background-color: #5c0000; }
+    .Sanguis-btn { background-color: #000000; }
+    .Sanguis-btn:hover { background-color: #5c0000; }
+
+    /* Cards */
+    .cards {
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:10px;
+      min-height:100px;
+      border:1px dashed #555;
+      padding:10px;
+    }
+
+    .card {
+      width:60px;
+      height:90px;
+      border:1px solid white;
+      background:#fff;
+      color:black;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      font-weight:bold;
+      cursor:grab;
+      user-select:none;
+      transition: transform 400ms ease, opacity 400ms ease;
+      white-space: pre-line; /* preserve the rank\nsuit formatting */
+    }
+
+    .card.discarded { opacity:0.3; text-decoration:line-through; }
+
+    /* Sweep animation when discarding */
+    .card.swept { transform: translateX(200px) rotate(15deg) scale(0.9); opacity: 0; }
+
+    /* Suit Colors */
+    .clubs { color: darkblue; }
+    .diamonds { color: orange; }
+    .hearts { color: red; }
+    .spades { color: black; }
+
+    /* Traits */
+    .traits {
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:15px;
+      margin-top:15px;
+    }
+    .trait {
+      border:1px solid white;
+      padding:10px;
+      min-height:100px;
+      background:#111;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .trait h3 { margin:0 0 10px 0; }
+    .trait .assigned { display:flex; align-items:center; gap:15px; }
+
+    /* Chips */
+    .chips { display:flex; gap:10px; margin-top:10px; }
+    .chip-img { width:50px; height:50px; cursor:pointer; }
+
+    /* Tooltip panel */
+    #tooltip {
+      position:fixed;
+      top:50px;
+      right:20px;
+      background:#222;
+      border:1px solid white;
+      padding:10px;
+      display:none;
+      width:250px;
+      z-index:200;
+    }
+
+    t {
+      display:block;
+      padding-left:20%;
+      padding-right:20%;
+      font-size:20px;
+      box-sizing:border-box;
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay"></div>
+
+  <button class="openbtn" onclick="openSidebar()">☰ Menu</button>
+
+  <t> If you are new to deadlands and all of this is very confusing to you, DO NOT BE INTIMIDATED! Do not let all of this deter you from the setting, if you're interested in the settings and the adventures to be had and this is too much for you that is OKAY. Since this is an AI RPG you can play without any advanced functions like this - even the AI is going to trip over this system, it's a bit complex for an AI RPG. This is here for players who want to try a new system, like unique TTRPG mechanics, or are die hard fans of deadlands.</t>
+  <br>
+  <t> If you are getting started here, check out the Learn how to Play tab. If you are interested in more simple but still TTRPG mechanics, check out the d20 system (more DnD-like)</t>
+
+  <!-- Sidebar content updated to match the second website's design/links/buttons -->
+  <div id="mySidebar" class="sidebar">
+    <span class="closebtn" onclick="closeSidebar()">×</span>
+    <a href="index.html">Home</a>
+    <a href="guide.html">Deadlands: Custodial Edition Intro</a>
+    <a href="generator.html">Character Idea Generator</a>
+    <a href="builder.html">Character/Stat Builder</a>
+    <a href="shop.html">Inventory Helper/Shop</a>
+    <br><br><br>
+    <a href="https://discord.gg/yMx6j79yez" target="_blank" class="discord-btn">Discord</a>
+    <a href="https://janitorai.com/characters/6af72b1b-d44f-4966-845f-67a2ff20adfe_character-%E2%98%A0%EF%B8%8E%EF%B8%8E-deadlands-rpg-%F0%9F%82%A1" target="_blank" class="deadlands-btn">Deadlands RPG on Janitor AI</a>
+    <p style="padding: 0 20px; margin: 10px 0;"> More Modules: </p>
+    <a href="https://bimaadizi.github.io/Forgotten-Realms-RPG/" target="_blank" class="forgotten-realms-btn">DnD/RPG Prompts</a>
+    <a href="https://bimaadizi.github.io/Sanguis/" target="_blank" class="Sanguis-btn">Vampire Prompts</a>
+  </div>
+
+  <div class="content">
+    <h1>Deadlands Character Builder</h1>
+
+    <!-- Card Draw -->
+    <div class="section" id="step1">
+      <h2>Step 1: Draw Cards (12)</h2>
+      <button onclick="drawCards()">Draw Cards</button>
+      <div class="cards" id="cards"></div>
+      <div style="margin-top:8px;">
+        <button onclick="discardToTen()">Keep 10 (Discard 2)</button>
+      </div>
+
+      <!-- moved Copy Stats button to bottom of this stats block as requested -->
+      <div style="margin-top:12px;">
+        <button onclick="copyStats()">Copy Stats</button>
+      </div>
+    </div>
+
+    <!-- Assign to Traits -->
+    <div class="section">
+      <h2>Step 2: Assign to Traits</h2>
+      <p>Drag your 10 kept cards onto traits. The card moves out of the lineup and shows up in the trait box. You can drag it back if you change your mind.</p>
+      <div class="traits" id="traits"></div>
+    </div>
+
+    <!-- Edges & Hindrances -->
+    <div class="section">
+      <h2>Step 3: Edges & Hindrances</h2>
+      <button onclick="playButtonSound(); generateEdges()">Generate</button>
+      <h3>Edges</h3>
+      <ul id="edges"></ul>
+      <h3>Hindrances</h3>
+      <ul id="hindrances"></ul>
+      <div style="margin-top:8px;">
+        <button onclick="copyEdges()">Copy Edges/Hindrances</button>
+      </div>
+    </div>
+
+    <!-- Fate Chips -->
+    <div class="section">
+      <h2>Step 4: Fate Chips</h2>
+      <button onclick="drawChips()">Draw Chips</button>
+      <div class="chips" id="chips"></div>
+      <div style="margin-top:8px;">
+        <button onclick="copyChips()">Copy Chips</button>
+      </div>
+    </div>
+
+    <!-- Final Copy -->
+    <div class="section">
+      <h2>Final Export</h2>
+      <button onclick="copyAll()">Copy Full Character</button>
+    </div>
+  </div>
+
+  <div id="tooltip"></div>
+  <br><br><br><br><br><br><p>.</p>
+
+  <script>
+    /*****************************
+     * Data & configuration
+     *****************************/
+    const suits = ["♣","♦","♥","♠"];
+    const ranks = ["2","3","4","5","6","7","8","9","10","J","Q","K","A"];
+    let deck = [];
+    let drawnCards = [];
+
+    const traitsList = [
+      "Deftness","Nimbleness","Quickness","Strength","Vigor",
+      "Cognition","Knowledge","Mien","Smarts","Spirit"
+    ];
+
+    const edgesList = [
+"Alertness",
+"Ambidextrous",
+"Arcane Resistance",
+"Aristocrat",
+"Attractive",
+"Brave",
+"Brawny",
+"Brute",
+"Charismatic",
+"Fame",
+"Fast Healer",
+"Unphased",
+"Linguist",
+"Lucky",
+"Quick",
+"Rich",
+"Vereran of the Weird West",
+"Brawler",
+"Calculating",
+"Counter Attack",
+"Duelist",
+"Extraction",
+"Hard to Kill",
+"Martial Artist",
+"Nerves of Steel",
+"Good shot",
+"Natural leader",
+"Commanding Presence",
+"Inspirational",
+"Tactician",
+"Arcane Background (Blessed)",
+"Arcane Background (Chi Master)",
+"Arcane Background (Huckster)",
+"Arcane Background (Mad Scientist)",
+"Arcane Background (Shaman)",
+"Arcane Background (Voodooist)",
+"Arcane Background (Witch)",
+"Acrobat",
+"Scholar",
+"Jack of all trades - master of none",
+"Guts",
+"Woodsman",
+"Has Connections",
+"Reliable",
+"Streetwise",
+"Healer",
+"Scavenger",
+"Tough as Nails",
+"True Grit",
+"Weapon Master",
+"Smooth talker",
+"Natural tale-spinner",
+"Poker face",
+"Trailwise",
+"Desert rat",
+"Camper",
+"Forager",
+"Iron grip",
+"Urban Know-How",
+"Improviser",
+"Dirty Fighter",
+"Sneaky",
+"Clever",
+"Good Liar",
+"Haggler",
+"Gunsmith",
+"Engineer",
+"Light Sleeper",
+"Tinkerer",
+"Horseman",
+"Entertainer",
+"Knows the land",
+"Relentless",
+"Bookworm",
+"Historian",
+"Good Balance",
+"Fire Tender",
+"Meteorologist",
+"Neighborly",
+"Plainspoken",
+"Known face",
+"Famous",
+"High pain tolerance",
+"Good metabolism",
+"Patient",
+"Detail-oriented",
+"Eagle eye",
+"Early riser",
+"Even Temper",
+"Thick-Skinned",
+"Animal whisperer",
+"Organized",
+"Quiet Step",
+"Strong Swimmer",
+"Long Walker",
+"Good Handshake",
+"Polite",
+"Fair Dealer",
+"Story Collector",
+"Never Sick",
+"Tough Feet",
+"Reasonable",
+"Doesn't panic",
+"Doesn't dawdle",
+"Good w/ directions",
+"Good singer",
+"Keen Nose",
+"Watcher",
+"Tidy",
+"Fair-Minded",
+"Always Ready",
+"Sweet-talker",
+"Animal Tracker",
+"Straight Shooter",
+"Easy Laugh",
+"Meditating Presence",
+"Quick to Compliment",
+"Hard Knuckles",
+"Thick Skin",
+"Careful Planner",
+"Pocket Knife Handyman",
+"Good Cook",
+"Good Etiquette",
+"Honest eyes",
+"Salt of the earth",
+"Rain-proof",
+"Deep Pockets",
+"Mathematician",
+"Humorous",
+"Persuasive",
+"Diplomatic",
+"Networker",
+"Analytical",
+"Quick Learner",
+"Problem Solver",
+"Good Listener",
+"Resilient",
+"Enduring",
+"Catlike Reflexes",
+"Handy Trader",
+"Fixer",
+"Stoic",
+"Cheerful",
+"Curious",
+"Faithful",
+"Pragmatic",
+"Peacemaker",
+"High Jumper",
+"Fast Runner",
+"Master of Tools",
+"Craftsman",
+"Unshakable",
+"Heavyweight Drinker",
+"Entrepreneur",
+"Smells amazing"
+//truncated
+];
+    const hindrancesList = [
+"easy to scam",
+"Opium Addict",
+"One-Eyed",
+"Hard of Hearing",
+"Clumsy",
+"Bad Back",
+"Weak Grip",
+"Slow Healer",
+"Short-Sighted",
+"Far-Sighted",
+"Absent-Minded",
+"Overconfident",
+"Paranoid",
+"Scaredy Catlike",
+"Gullible",
+"Obsessive",
+"Fearful",
+"Short Attention",
+"Daydreamer",
+"Tunnel Vision",
+"Hot-Headed",
+"Compulsive Liar",
+"Bad Liar",
+"Greedy",
+"Blabbermouth",
+"Callous",
+"Too Trusting",
+"Infamous",
+"Bragger",
+"Illiterate",
+"Directionless",
+"Poor Sense of Time",
+"Unlucky",
+"Alcoholic",
+"Lightweight Drinker",
+"Thin-skinned",
+"Debt Ridden",
+"Cluttered",
+"Poor",
+"Heavy Sleeper",
+"Unlucky",
+"Melancholic",
+"Overly Serious",
+"Pessimist",
+"Coward",
+"Reckless",
+"Nosy",
+"Scatterbrained",
+"Impulsive",
+"Brutally Honest",
+"Wanderlust",
+"Martyr Complex",
+"Egotist",
+"Hopeless Romantic",
+"Asthmatic",
+"Colorblind (red-green)",
+"Colorblind (Achromatopsia)",
+"Sensitive Skin",
+"Gluttonous",
+"Wraithful",
+"Lazy",
+"Envious",
+"Prideful",
+"Annoying",
+"Trembling voice",
+"Delusional",
+"Schizophrenic",
+"Forgetful With Faces",
+"Overly Suspicious",
+"Low Self-Esteem",
+"Rude",
+"Awkward",
+"Meek",
+"Xenophobic",
+"Bigoted",
+"Snob",
+"Competitive",
+"Boorish",
+"Secretive",
+"Tone Deaf",
+"Two-Faced",
+"Blunt",
+"Family Burden",
+"Exiled",
+"Vain",
+"Obsessive collector",
+"OCD",
+"Needy",
+"Overly Honest",
+"Thrill-seeker",
+"Melodramatic",
+"Bad with Animals",
+"Miserable in Cold",
+"Miserable in Heat",
+"Picky Eater",
+"Germaphobe",
+"Smells terrible",
+"Poor Hygeine",
+"Forgetful",
+"Constant Guilt",
+"Chronic Complainer",
+"Interrupts people",
+"Defeatist",
+"Shaky Handshake",
+"Hobbled",
+"Bad Balance",
+"Hallucinates",
+"Perfectionist",
+"Slow Thinker",
+"Ugly",
+"Packrat",
+"Poor Reflexes",
+"Weak Stomach",
+"Sickly",
+"Requires Daily Medication",
+"Loses words mid-sentence",
+"Overthinker",
+"Hopelessly Idealistic",
+"Overbearing",
+"Inarticulate",
+"Bad at Directions",
+"Attracts flies",
+"Overpays",
+"Sleepwalker",
+"Thin Blood",
+"Nagger",
+"Jaded",
+"Fatalistic",
+"Sulky",
+"Crybaby",
+"Can't take a joke",
+"Astigmatic",
+"Conspiracy-minded",
+"Fidgety",
+"Bad at math",
+"Name mangler",
+"Awkward hugger",
+"Gossiper",
+"Overly Formal",
+"Can't swim",
+"Chronic Gambler",
+"Nostalgic",
+"Petty",
+"Suspicious Stare",
+"Excessive Optimist",
+"Chronic Singing",
+"Bloodthirsty",
+"Blind",
+"Night Terrors",
+"Elderly",
+"Overly Hesitant",
+"Trouble Magnet",
+"Obese",
+"One Arm",
+"Poverty",
+"Quirky",
+"Stubborn",
+"Inexperienced",
+"Wanted",
+"Anemic",
+"Unfairly slandered",
+"Stalked"  // truncated
+];
+
+    const chipData = {
+      white: `White Fate Chips<br>- Regain 2 Wind<br>- Add +1d6 to a roll (after rolling)<br>- Bounty: Worth 1`,
+      red:   `Red Fate Chips<br>- Regain 2 Wind<br>- Add +1d6 to a roll (after rolling)<br>- BUT: Marshal draws when used for +1d6<br>- Bounty: Worth 2`,
+      blue:  `Blue Fate Chips<br>- Regain 2 Wind<br>- Add +1d6 to a roll<br>- Negate one wound<br>- Bounty: Worth 3`,
+      gold:  `Legend Chips<br>- Heal ALL Wind<br>- Cancel all wounds <br>- Add +2d6 to a roll<br>- Miraculous story effect (Marshal discretion)<br>- Bounty: Worth 5`
+    };
+
+    let tooltipTimer;
+
+    /*****************************
+     * UI helpers (sidebar)
+     *****************************/
+    function openSidebar(){ document.getElementById("mySidebar").style.width="250px"; }
+    function closeSidebar(){ document.getElementById("mySidebar").style.width="0"; }
+
+    function buildDeck(){
+      deck = [];
+      for (const s of suits){
+        for (const r of ranks){
+          deck.push({ rank: r, suit: s, discarded: false, assigned: null });
+        }
+      }
+      deck.push({ rank: "Joker", suit: "Black", discarded:false, assigned:null });
+      deck.push({ rank: "Joker", suit: "Red", discarded:false, assigned:null });
+    }
+
+    /*****************************
+     * Card draw (sequential) + sound
+     *****************************/
+    function drawCards(){
+      buildDeck();
+      drawnCards = [];
+      const container = document.getElementById("cards");
+      container.innerHTML = "";
+
+      for (let i=0; i<12; i++){
+        const idx = Math.floor(Math.random()*deck.length);
+        const card = deck.splice(idx,1)[0];
+        drawnCards.push(card);
+
+        setTimeout(()=>{
+          // Only show it visually if not already assigned/discarded (fresh draw always not)
+          if (!card.discarded && !card.assigned){
+            const div = createCardDiv(card, drawnCards.indexOf(card), "lineup");
+            container.appendChild(div);
+
+            // Play draw sound
+            const audio = new Audio("card3.ogg");
+            audio.volume = 0.2;
+            audio.play();
+          }
+        }, i * 75); // 75ms stagger
+      }
+    }
+
+    function renderCards(){
+      const container = document.getElementById("cards");
+      container.innerHTML = "";
+      drawnCards.forEach((c,i)=>{
+        if (c.discarded) return;
+        if (c.assigned) return;
+        const div = createCardDiv(c, i, "lineup");
+        container.appendChild(div);
+      });
+    }
+
+    function createCardDiv(card, index, from){
+      const div = document.createElement("div");
+      div.className = "card " + suitClass(card.suit);
+      if (card.discarded) div.classList.add("discarded");
+      div.innerText = `${card.rank}\n${card.suit}`;
+      div.draggable = true;
+
+      div.ondragstart = (e) =>
+        e.dataTransfer.setData("text/plain", JSON.stringify({ index, from }));
+
+      // CLICK = toggle grey discard (only mark it, don’t sweep)
+      div.onclick = () => {
+        if (from !== "lineup") return;
+        card.discarded = !card.discarded;
+        div.classList.toggle("discarded", card.discarded);
+      };
+
+      // Tooltip
+      div.onmouseenter = () => {
+        tooltipTimer = setTimeout(() => { showTooltip(card); }, 50);
+      };
+      div.onmouseleave = () => {
+        clearTimeout(tooltipTimer);
+        hideTooltip();
+      };
+
+      return div;
+    }
+
+    function discardToTen(){
+      const marked = drawnCards.filter(c => c.discarded);
+      if (marked.length !== 2){
+        alert("You must mark exactly 2 cards to discard (click them to grey out).");
+        return;
+      }
+
+      // Animate and play double sound for each marked discard
+      marked.forEach(card => {
+        const idx = drawnCards.indexOf(card);
+        const container = document.getElementById("cards");
+        const divs = container.querySelectorAll(".card");
+        const div = divs[idx];
+        if (div){
+          div.classList.add("swept");
+          // play card3 twice, staggered
+          const a1 = new Audio("card3.ogg"); a1.volume = 0.2; a1.play();
+          setTimeout(() => { const a2 = new Audio("card3.ogg"); a2.volume = 0.2; a2.play(); }, 50);
+
+          setTimeout(() => {
+            if (div.parentElement) div.parentElement.removeChild(div);
+          }, 420);
+        }
+      });
+
+      // Remove discarded cards from data
+      drawnCards = drawnCards.filter(c => !c.discarded);
+    }
+
+
+    /*****************************
+     * Traits / assignment
+     *****************************/
+    function renderTraits(){
+      const container = document.getElementById("traits");
+      container.innerHTML = "";
+      traitsList.forEach((t) => {
+        const div = document.createElement("div");
+        div.className = "trait";
+        div.innerHTML = `<h3>${t}</h3><div class="assigned" id="trait-${t}"></div>`;
+        div.ondragover = (e) => e.preventDefault();
+        div.ondrop = (e) => {
+          e.preventDefault();
+          const data = JSON.parse(e.dataTransfer.getData("text/plain"));
+          assignCardToTrait(data.index, t);
+        };
+        container.appendChild(div);
+      });
+
+      // lineup droppable to return cards
+      const lineup = document.getElementById("cards");
+      lineup.ondragover = (e)=> e.preventDefault();
+      lineup.ondrop = (e) => {
+        e.preventDefault();
+        const data = JSON.parse(e.dataTransfer.getData("text/plain"));
+        returnCardToLineup(data.index);
+      };
+    }
+
+    function assignCardToTrait(cardIndex, trait){
+      const card = drawnCards[cardIndex];
+      card.assigned = trait;
+
+      // play card assignment sound instantly
+      const audio = new Audio("card3.ogg");
+      audio.volume = 0.2;
+      audio.play();
+
+      renderCards();
+      renderTraitAssignments();
+    }
+
+    function returnCardToLineup(cardIndex){
+      if (!drawnCards[cardIndex]) return;
+      drawnCards[cardIndex].assigned = null;
+      renderCards();
+      renderTraitAssignments();
+    }
+
+    function renderTraitAssignments(){
+      traitsList.forEach(t=>{
+        const assignedDiv = document.getElementById(`trait-${t}`);
+        assignedDiv.innerHTML = "";
+        const card = drawnCards.find(c => c.assigned === t);
+        if (card){
+          const div = createCardDiv(card, drawnCards.indexOf(card), "trait");
+          const dieType = cardToDie(card.rank);
+          const diceCount = suitToDice(card.suit);
+          const diceText = document.createElement("span");
+          diceText.innerText = `→ ${diceCount}d${dieType}`;
+          assignedDiv.appendChild(div);
+          assignedDiv.appendChild(diceText);
+        }
+      });
+    }
+
+    function cardToDie(rank){
+      if (["2","3","4","5"].includes(rank)) return 4;
+      if (["6","7"].includes(rank)) return 6;
+      if (["8","9"].includes(rank)) return 8;
+      if (["10","J"].includes(rank)) return 10;
+      if (["Q","K"].includes(rank)) return 12;
+      if (rank === "A") return "12+2";
+      if (rank === "Joker") return 20;
+    }
+
+    function suitToDice(suit){
+      if (suit === "♣") return 1;
+      if (suit === "♦") return 2;
+      if (suit === "♥") return 3;
+      if (suit === "♠") return 4;
+      return 1;
+    }
+
+    function suitClass(suit){
+      if (suit === "♣") return "clubs";
+      if (suit === "♦") return "diamonds";
+      if (suit === "♥") return "hearts";
+      if (suit === "♠") return "spades";
+      return "";
+    }
+
+    /*****************************
+     * Sounds for buttons
+     *****************************/
+    function playButtonSound(){
+      const audio = new Audio("button.ogg");
+      audio.volume = 0.2;
+      audio.play();
+    }
+
+    /*****************************
+     * Edges & Hindrances (unique per generation)
+     *****************************/
+    function generateEdges(){
+      const edgesUl = document.getElementById("edges");
+      const hindrancesUl = document.getElementById("hindrances");
+      edgesUl.innerHTML = "";
+      hindrancesUl.innerHTML = "";
+
+      let edgePool = [...edgesList];
+      let hindrancePool = [...hindrancesList];
+
+      for (let i=0;i<3;i++){
+        const eIdx = Math.floor(Math.random()*edgePool.length);
+        const edge = edgePool.splice(eIdx,1)[0];
+        const liE = document.createElement("li"); liE.innerText = edge; edgesUl.appendChild(liE);
+
+        const hIdx = Math.floor(Math.random()*hindrancePool.length);
+        const hind = hindrancePool.splice(hIdx,1)[0];
+        const liH = document.createElement("li"); liH.innerText = hind; hindrancesUl.appendChild(liH);
+      }
+    }
+
+    /*****************************
+     * Chips: images, staggered draw, sound
+     *****************************/
+    function drawChips(){
+      const container = document.getElementById("chips");
+      container.innerHTML = "";
+      const colors = ["white","red","blue","gold"];
+      const weights = [0.5,0.25,0.2,0.05];
+
+      for (let i=0;i<3;i++){
+        const color = weightedRandom(colors, weights);
+
+        setTimeout(()=>{
+          const img = document.createElement("img");
+          img.src = color.charAt(0).toUpperCase() + color.slice(1) + "_chip.webp"; // White_chip.webp etc.
+          img.className = "chip-img";
+          img.dataset.color = color;
+
+          img.onmouseenter = ()=> {
+            tooltipTimer = setTimeout(()=>{ showChipTooltip(color); }, 50);
+          };
+          img.onmouseleave = ()=> {
+            clearTimeout(tooltipTimer);
+            hideTooltip();
+          };
+
+          container.appendChild(img);
+
+          // play chip sound per chip
+          const audio = new Audio("chips1.ogg");
+          audio.volume = 0.2;
+          audio.play();
+        }, i * 75);
+      }
+    }
+
+    function weightedRandom(items, weights){
+      let total = weights.reduce((a,b)=>a+b,0);
+      let r = Math.random()*total;
+      for (let i=0;i<items.length;i++){
+        if (r < weights[i]) return items[i];
+        r -= weights[i];
+      }
+      return items[0];
+    }
+
+    /*****************************
+     * Tooltips
+     *****************************/
+    function showTooltip(card){
+      const panel = document.getElementById("tooltip");
+      const die = cardToDie(card.rank);
+      const diceCount = suitToDice(card.suit);
+      panel.innerHTML = `<b>${card.rank}${card.suit}</b><br>Rank = d${die}<br>Suit = ${diceCount} die/dice`;
+      panel.style.display = "block";
+    }
+    function showChipTooltip(color){
+      const panel = document.getElementById("tooltip");
+      panel.innerHTML = chipData[color];
+      panel.style.display = "block";
+    }
+    function hideTooltip(){ document.getElementById("tooltip").style.display = "none"; }
+
+    /*****************************
+     * Copy helpers (play crumple2.ogg when copying)
+     *****************************/
+    function playCrumple(){
+      const a = new Audio("crumple2.ogg");
+      a.volume = 0.2;
+      a.play();
+    }
+
+    function traitValue(trait){
+      const card = drawnCards.find(c=>c.assigned === trait);
+      if (!card) return "[unassigned]";
+      return `${suitToDice(card.suit)}d${cardToDie(card.rank)}`;
+    }
+
+    function copyStats(){
+      playCrumple();
+      let text = "[Stats]\n**Corporeal**: ";
+      const corp = ["Deftness","Nimbleness","Quickness","Strength","Vigor"];
+      text += corp.map(t=>`${t}: ${traitValue(t)}`).join(" | ") + "\n";
+      text += "**Mental**: ";
+      const mental = ["Cognition","Knowledge","Mien","Smarts","Spirit"];
+      text += mental.map(t=>`${t}: ${traitValue(t)}`).join(" | ");
+      navigator.clipboard.writeText(text).then(()=>{ alert("Stats copied!"); });
+    }
+
+    function copyEdges(){
+      playCrumple();
+      const edges = [...document.querySelectorAll("#edges li")].map(li=>li.innerText);
+      const hindrances = [...document.querySelectorAll("#hindrances li")].map(li=>li.innerText);
+      const text = `Edges: ${edges.join(", ")}\nHinderances: ${hindrances.join(", ")}`;
+      navigator.clipboard.writeText(text).then(()=>{ alert("Edges/Hindrances copied!"); });
+    }
+
+    function copyChips(){
+      playCrumple();
+      const chips = [...document.querySelectorAll("#chips img")].map(img=>img.dataset.color);
+      const counts = {red:0, blue:0, white:0, gold:0};
+      chips.forEach(c=>counts[c]++);
+      const text = `Chips: [${counts.red}] Red. [${counts.blue}] Blue. [${counts.white}] White. [${counts.gold}] Legendary`;
+      navigator.clipboard.writeText(text).then(()=>{ alert("Chips copied!"); });
+    }
+
+    function copyAll(){
+      playCrumple();
+      // chips
+      const chips = [...document.querySelectorAll("#chips img")].map(img=>img.dataset.color);
+      const counts = {red:0, blue:0, white:0, gold:0};
+      chips.forEach(c=>counts[c]++);
+
+      let text = `Chips: [${counts.red}] Red. [${counts.blue}] Blue. [${counts.white}] White. [${counts.gold}] Legendary\n\n`;
+
+      // edges/hindrances
+      const edges = [...document.querySelectorAll("#edges li")].map(li=>li.innerText);
+      const hindrances = [...document.querySelectorAll("#hindrances li")].map(li=>li.innerText);
+      text += `Edges: ${edges.join(", ")}\nHinderances: ${hindrances.join(", ")}\n\n`;
+
+      // wounds (static 0/5)
+      text += `[Wounds]\nHead: 0/5 | Gut: 0/5\nLeft Arm: 0/5 | Right Arm: 0/5\nLeft Leg: 0/5 | Right Leg: 0/5\n\n`;
+
+      // stats
+      text += "[Stats]\n**Corporeal**: ";
+      const corp = ["Deftness","Nimbleness","Quickness","Strength","Vigor"];
+      text += corp.map(t=>`${t}: ${traitValue(t)}`).join(" | ") + "\n";
+      text += "**Mental**: ";
+      const mental = ["Cognition","Knowledge","Mien","Smarts","Spirit"];
+      text += mental.map(t=>`${t}: ${traitValue(t)}`).join(" | ");
+
+      navigator.clipboard.writeText(text).then(()=>{ alert("Full character copied!"); });
+    }
+
+    /*****************************
+     * Init
+     *****************************/
+    // initial render of trait slots
+    renderTraits();
+  </script>
+</body>
+</html>

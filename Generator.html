@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Character Concept Generator</title>
+  <style>
+    /* ====== Global site look (match your other pages) ====== */
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: Arial, sans-serif;
+      color: white;
+      background: black url('background.png') no-repeat center center fixed;
+      background-size: cover;
+    }
+    .overlay {
+      background-color: rgba(0,0,0,0.6);
+      position: fixed;
+      inset: 0;
+      z-index: -1; /* keep content above it */
+    }
+    .logo {
+      display: block;
+      margin: 10px auto 0;
+      max-width: 800px;
+    }
+    .content {
+      max-width: 1000px;
+      margin: auto;
+      padding: 20px;
+    }
+.chooser-body {
+  padding: 12px 16px 60px; /* ← extra bottom padding */
+}
+    /* ====== Buttons ====== */
+    button {
+      background:#111;
+      color:white;
+      border:1px solid white;
+      padding:8px 14px;
+      cursor:pointer;
+      border-radius: 0px;
+    }
+    button:hover { background:#333; }
+
+    /* ====== Left navigation sidebar (scrollable, stays visible) ====== */
+    .openbtn {
+      font-size:20px;
+      cursor:pointer;
+      background:#111;
+      color:white;
+      border:none;
+      padding:10px 15px;
+      margin:10px;
+      border-radius: 0px;
+    }
+    .sidebar {
+      height: 100vh;               /* full viewport height */
+      width: 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background-color:#111;
+      overflow-y: auto;            /* scroll if content tall */
+      transition: width 0.3s;
+      padding-top:60px;
+      z-index: 100;
+      border-right:1px solid #333;
+    }
+    .sidebar a {
+      display:block;
+      padding:10px 20px;
+      text-decoration:none;
+      color:white;
+    }
+    .sidebar a:hover { background:#333; }
+    .sidebar .closebtn {
+      position:absolute;
+      top:10px;
+      right:20px;
+      font-size:25px;
+      cursor:pointer;
+    }
+
+    /* ====== Field pickers ====== */
+    .toolbar {
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin: 10px 0 20px;
+    }
+    .picker {
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap:8px;
+      align-items:center;
+      border:1px solid white;
+      background: rgba(17,17,17,0.95);
+      padding:14px;
+      margin:12px 0;
+      border-radius: 0px;
+    }
+    .picker-main {
+      display:flex;
+      gap:12px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .value {
+      font-weight:bold;
+      opacity:0.95;
+    }
+    .row {
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .lock-btn.locked {
+      background:#333;
+      border-style:dashed;
+    }
+
+    /* ====== Right chooser panel (always scrollable) ====== */
+    .chooser-panel {
+      height: 100vh;               /* lock to viewport */
+      width: 0;                    /* slides open to 360px */
+      position: fixed;
+      top: 0;
+      right: 0;
+      background: #111;
+      overflow-y: auto;            /* scroll if long list */
+      transition: width 0.3s;
+      padding-top: 60px;
+      z-index: 150;
+      border-left: 1px solid #444;
+    }
+    .chooser-header {
+      position: sticky;
+      top: 0;
+      background: #111;
+      padding: 12px 16px;
+      border-bottom: 1px solid #333;
+      z-index: 2;
+    }
+    .chooser-title {
+      margin: 0;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .chooser-close {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      font-size: 22px;
+      cursor: pointer;
+    }
+    .chooser-body {
+      padding: 12px 16px 80px;
+    }
+    .chooser-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 6px;
+    }
+    .chooser-item {
+      padding: 8px 10px;
+      border: 1px solid #444;
+      background: #1a1a1a;
+      cursor: pointer;
+      border-radius: 0px;
+    }
+    .chooser-item:hover { background: #2a2a2a; }
+    .chooser-section-title {
+      margin: 14px 0 6px;
+      font-weight: bold;
+      opacity: 0.9;
+      border-left: 3px solid #555;
+      padding-left: 8px;
+    }
+
+    @media (max-width: 768px) {
+      .content { padding: 15px; }
+    }
+			  .deadlands-btn {
+    display: block;
+    margin: 10px;
+    padding: 10px 15px;
+    background-color: #824c29; /* Discord purple */
+    color: white;
+    text-align: center;
+    border-radius: 8px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+
+  .deadlands-btn:hover {
+    background-color: #5f3316; /* Slightly darker hover */
+  }
+	  .discord-btn {
+    display: block;
+    margin: 10px;
+    padding: 10px 15px;
+    background-color: #5865F2; /* Discord purple */
+    color: white;
+    text-align: center;
+    border-radius: 8px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+
+  .discord-btn:hover {
+    background-color: #4752c4; /* Slightly darker hover */
+  }
+  
+  
+    .forgotten-realms-btn {
+    display: block;
+    margin: 10px;
+    padding: 10px 15px;
+    background-color: #8B0000; /* Dark red */
+    color: white;
+    text-align: center;
+    border-radius: 8px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+
+  .forgotten-realms-btn:hover {
+    background-color: #5c0000; /* Darker red on hover */
+  }
+	
+	
+	     .Sanguis-btn {
+    display: block;
+    margin: 10px;
+    padding: 10px 15px;
+    background-color: black; /* Dark red */
+    color: white;
+    text-align: center;
+    border-radius: 8px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+
+  .Sanguis-btn:hover {
+    background-color: #5c0000; /* Darker red on hover */
+  }
+
+	
+  </style>
+</head>
+<body>
+  <div class="overlay"></div>
+
+  <!-- Left nav trigger -->
+  <button class="openbtn" onclick="openNav()">☰ Menu</button>
+
+  <!-- Left navigation sidebar -->
+  <div id="navSidebar" class="sidebar" aria-hidden="true">
+    <span class="closebtn" onclick="closeNav()">×</span>
+  <a href="index.html">Home</a>
+  <a href="guide.html">Deadlands: Custodial Edition Intro</a>
+  <a href="generator.html">Character Idea Generator</a>
+  <a href="builder.html">Character/Stat Builder</a>
+  <a href="shop.html">Inventory Helper/Shop</a>
+    <br><br><br>
+  <a href="https://discord.gg/yMx6j79yez" target="_blank" class="discord-btn">Discord</a>
+    <a href="https://janitorai.com/characters/6af72b1b-d44f-4966-845f-67a2ff20adfe_character-%E2%98%A0%EF%B8%8E%EF%B8%8E-deadlands-rpg-%F0%9F%82%A1" target="_blank" class="deadlands-btn">Deadlands RPG on Janitor AI</a>
+<p> More Modules: </p>
+    <a href="https://bimaadizi.github.io/Forgotten-Realms-RPG/" target="_blank" class="forgotten-realms-btn">DnD/RPG Prompts</a>
+    <a href="https://bimaadizi.github.io/Sanguis/" target="_blank" class="Sanguis-btn">Vampire Prompts</a>
+
+  
+  </div>
+
+  <!-- Right chooser drawer -->
+  <aside id="chooserPanel" class="chooser-panel" aria-hidden="true">
+    <div class="chooser-header">
+      <h3 id="chooserTitle" class="chooser-title">Choose</h3>
+      <span class="chooser-close" onclick="closeChooser()">×</span>
+    </div>
+    <div id="chooserBody" class="chooser-body"></div>
+  </aside>
+
+  <img src="logo.png" alt="Logo" class="logo" />
+
+  <div class="content">
+    <h1>Character Concept Generator</h1>
+
+    <!-- Global toolbar -->
+    <div class="toolbar">
+      <button id="btnGenerate">Generate</button>
+      <button id="btnReset">Reset</button>
+    </div>
+
+    <!-- Pickers -->
+    <div class="picker" data-field="location">
+      <div class="picker-main">
+        <button class="picker-btn" data-open="location">Location</button>
+        <span class="value" id="val-location">—</span>
+      </div>
+      <div class="row">
+        <button class="mini-btn" data-randomize="location">Randomize</button>
+        <button class="lock-btn" data-lock="location">🔓 Lock</button>
+      </div>
+    </div>
+
+    <div class="picker" data-field="gender">
+      <div class="picker-main">
+        <button class="picker-btn" data-open="gender">Gender</button>
+        <span class="value" id="val-gender">—</span>
+      </div>
+      <div class="row">
+        <button class="mini-btn" data-randomize="gender">Randomize</button>
+        <button class="lock-btn" data-lock="gender">🔓 Lock</button>
+      </div>
+    </div>
+
+    <div class="picker" data-field="ethnicity">
+      <div class="picker-main">
+        <button class="picker-btn" data-open="ethnicity">Ethnicity</button>
+        <span class="value" id="val-ethnicity">—</span>
+      </div>
+      <div class="row">
+        <button class="mini-btn" data-randomize="ethnicity">Randomize</button>
+        <button class="lock-btn" data-lock="ethnicity">🔓 Lock</button>
+      </div>
+    </div>
+
+    <div class="picker" data-field="archetype">
+      <div class="picker-main">
+        <button class="picker-btn" data-open="archetype">Archetype</button>
+        <span class="value" id="val-archetype">—</span>
+      </div>
+      <div class="row">
+        <button class="mini-btn" data-randomize="archetype">Randomize</button>
+        <button class="lock-btn" data-lock="archetype">🔓 Lock</button>
+      </div>
+    </div>
+
+    <div class="picker" data-field="being">
+      <div class="picker-main">
+        <button class="picker-btn" data-open="being">Being</button>
+        <span class="value" id="val-being">—</span>
+      </div>
+      <div class="row">
+        <button class="mini-btn" data-randomize="being">Randomize</button>
+        <button class="lock-btn" data-lock="being">🔓 Lock</button>
+      </div>
+    </div>
+
+    <div class="toolbar" style="justify-content:flex-end;">
+      <button id="btnCopy">Copy Character</button>
+    </div>
+  </div>
+
+  <script>
+    /*********************************
+     * DATA (trimmed samples; paste your full lists later)
+     *********************************/
+    // Grouped ethnicity (category -> subcategories)
+const commonEthnicities = {
+  White: ["Italian", "Irish", "German", "English", "French", "Spanish", "White Mormon", "Jew", "Scottish", "Russian", "Polish", "Czech", "Danish", "Norwegian", "Swede", "Austro-Hungarian", "Welsh", "Swiss", "Portuguese", "Dutch", "Anglo-American (Northerner)", "Anglo-American (Southerner)", "Anglo-American", "Cornish"],
+  Hispanic: ["Mexican", "Tex-Mex", "Californio", "Peruvian", "Cuban", "Puerto Rican", "Mexican", "Mexican", "Tex-Mex", "Mexican", "Chilean", "Argentine", "Colombian"],
+  Chinese: ["Cantonese Han", "Hui Muslim", "Mandarin Han", "Hakka"],
+  Black: ["Black Freedmen", "Louisiana Creole", "Afro-Caribbean", "Gullah", "Black Seminole"],
+  Native: ["Sioux", "Cheyenne", "Arapaho", "Comanche", "Kiowa", "Pawnee", "Apache", "Navajo", "Chinook", "Spokane", "Choctaw", "Creek", "Potawatomi", "Ojibwe", "Metis", "Nez Perce", "Shoshone", "Lakota", "Seminole", "Ute", "Hopi", "Zuni"]
+};
+
+const uncommonEthnicities = [
+  "East Indian", "Japanese", "Turkish", "Romani", "Iranian", "Greek", "Korean", "Filipino", "Mongolian", "Pacific Islander", "Mizrahi", "Basque", "Levantine", "Armenian", "Egyptian", "Baltic", "African Immigrant", "Hawaiian", "Kanaka"
+];
+    // Location pools (US only)
+    const siouxStates = ["Dakota","Wyoming","Nebraska"];
+    const westernerStates = [
+      "Washington","Oregon","Idaho","Montana","Nevada","Minnesota","Iowa","Wisconsin","Illinois",
+      "Missouri","Arkansas","Mississippi","Louisiana","Texas","New Mexico","Arizona","Kansas",
+      "Oklahoma","Colorado","Utah"
+    ];
+    // Maze locations (each appears ONCE; Maze as a whole has same odds as ANY single state)
+    const mazerOrigins = [
+      "New Opportunity","Harmony","Goodwill",
+      "Shan Fan","Kwan's Province",
+      "Sacramento","Fort Lincoln","The City of Lost Angels","Lynchburg","Quarrytown","Placerville"
+    ];
+
+    // Archetypes (general + ethnicity-exclusive)
+    const GENERAL_ARCHETYPES = [
+  "Muckraker", "Photographer", "Teamster", "Telegraph Operator", "Blacksmith", "Brewer", 
+  "Carpenter", "Engineer", "Gunsmith", "Junk Dealer", "Leatherworker", "Milliner", 
+  "Millwright", "Tailor", "Assassin", "Bandit", "Bank Robber", "Granger", "Horse Thief", 
+  "Pirate", "Safe Cracker", "Rustler (Cattle Thief)", "Con Artist", "Train Robber", 
+  "Snake-oil Salesman", "Actor", "Circus Performer", "Dancer", "Freak Show Member", 
+  "Pugilist", "Agent", "Circuit Judge", "County Sheriff", "Deputy", "Guardian Angel", 
+  "Lawyer", "Pinkerton", "Texas Ranger", "Town Marshal", "Bronco Bustler", 
+  "Cattle Inspector", "Cattle Baron", "Cook", "Cowboy", "Cowpoke", "Drover", "Gaucho", 
+  "Rancher", "Sheep Herder", "Trail Boss", "Wrangler", "Apothecary", "Blessed", "Dentist", 
+  "Doctor", "Nurse", "Veterinarian", "Artillery", "Cavalry", "Deserter", "Infantry", 
+  "Marine", "Medic", "Quartermaster", "Sailor", "Sharpshooter", "Archaeologist", 
+  "Bounty Hunter", "Businessman", "Farmer", "Hermit", "Old Coot", "Prospector", 
+  "School Marm", "Street Urchin", "Big Game Hunter", "Guide", "Mountainman", "Tracker", 
+  "Trapper", "Woodsman", "Greenhorn", "Tinhorn", "Mayor", "Politician", "Shyster", 
+  "Agitator", "Cultist", "Imam", "Priest", "Nun", "Templar", "Witch", "Demimonde", 
+  "Drifter", "Gambler", "Gunslinger", "Spy", "Alchemist", "Mad Scientist", "Assayer", 
+  "Banker", "Barber", "Bar Porter", "Bartender", "Librarian", "Butcher", "Clerk", 
+  "Laundryman", "Undertaker", "Hexslinger", "Huckster", "Drummer", "Horse Trader", 
+  "Storekeep", "Navigator", "Rail Warrior", "Riverboat Captain", "Shotgun Messenger", 
+  "Stage Driver", "Stoker", "Train Brakeman", "Train Conductor", "Porter", "Smuggler", 
+  "Surveyor", "Printer", "Night Rider", "Seer", "Wagonmaster", "Fencer", "Strongman", "Buffalo Hunter", "Freighter", "Astrologer", "Phrenologist", "Mesmerist", "Vaudevillian", "Homesteader", "Preacher", "Powder Monkey", "Ex-Dragoon"
+
+    ];
+
+    const EXCLUSIVE_ARCHETYPES = {
+  Italian: ["Black Hand (Mafia)", "Carbonari Radical", "Garibaldino Veteran", "Strega", "Vendetta Gunman"],
+  Irish: ["Molly Maguire", "Fenian Rebel", "Ribbonman", "Whiskey Runner"],
+  Japanese: ["Former Samurai", "Ronin Peasant-Soldier", "Sohei Ascetic"],
+  German: ["Forty-Eighter Radical", "Hexmeister"],
+  Mormon: ["Danite Avenger"],
+  Armenian: ["Gregorian Mystic"],
+  Baltic: ["Runesinger"],
+  Californio: ["Caballero", "Curandero, Aztec Revivalist", "Bandoleros"],
+  Mexican: ["Cabalista", "Vaquero", "Guadalupano", "Curandero", "Aztec Revivalist", "Bandoleros"],
+  "Tex-Mex": ["Vaquero", "Guadalupano", "Curandero"],
+  Chinese: ["Tong Enforcer", "Triad Member", "Paper Son", "Exiled Shaolin", "Boxer Rebel", "Buddhist Monk", "Confucian"],
+  Black: ["Buffalo Soldier", "Conjure Doctor", "Exoduster", "African Griot", "Rootworker"],
+  "Louisiana Creole": ["Voodoo Practitioner", "Obeahman"],
+  Native: ["Scout", "Dog Soldier", "Brave", "Shaman", "Ghost Dancer", "Horse Raider"],
+  "East Indian": ["Sikh Cavalryman"],
+  Basque: ["Irrintzi Shephard", "Sheep warrior"],
+  Russian: ["Volkhv", "Fur-Trade Cossack"],
+  Spanish: ["Alquimista Folk Alchemist", "Confradia Brother", "Penitente Flagellant"],
+  Portuguese: ["Azorean Whaler", "Brotherhood Penitente", "Sebastianist Dreamer"],
+  Polish: ["Koscian Mystic", "Czarnoksiężnik"], 
+  Cornish: ["Knocker Whisperer"],
+  Greek: ["Orthodox Mystic", "Pythagorean Numerologist"],
+  Jew: ["Kabbalist Mystic", "Rabbi"],
+  Mizrahi: ["Kabbalist Mystic", "Rabbi"],
+  Egyptian: ["Coptic Mystic"],
+  Colombian: ["Bolivarian Guerrillero"],
+  Turkish: ["Bektashi Dervish", "Coffee Diviner"],
+  Levantine: ["Coffee Diviner", "Druze Exile"],
+  Gullah: ["Root Doctor", "Ring Shouter"],
+  Venezuelan: ["Bolivarian Guerrillero"],
+  Peruvian: ["Bolivarian Guerrillero"],
+  Chilean: ["Bolivarian Guerrillero"],
+  Cuban: ["Cigarroller"],
+  "Puerto-Rican": ["Cigarroller", "espiritista"],
+  Argentine: ["Bolivarian Guerrillero"],
+  Mongolian: ["Steppe Horse Archer", "Tengri Shaman", "Wolf-Brother"],
+  Romani: ["Curse-Binder"],
+  Hawaiian: ["Navigator-Priest"],
+  "Pacific Islander": ["Navigator-Priest"],
+  Kanaka: ["Navigator-Priest"],
+French: ["Coureur des Bois Descendant", "Enlightenment Idealist", "Lost Dauphin", "Cult of Reason Devotee", "Baratarian"],
+  English: ["Quaker", "Old-Stock Yeoman", "Temperance Crusader", "Spiritualist Medium", "Witch-Pricker Descendant"],
+  Czech: ["Hussite Liturge", "Krakonoš’s Favored"],
+  "Austro-Hungarian": ["Hajduk Remnant", "Puszta Horseman"],
+  Danish: ["Viking", "Barn-Rune Painter", "Laestadian"],
+  Norwegian: ["Fjordman Helmsman", "Viking", "Runesinger", "Barn-Rune Painter", "Laestadian "],
+  Swede: ["Tomte Keeper", "Forest Seidr", "Barn-Rune Painter", "Laestadian"],
+  Welsh: ["Bardic Druid", "Cuckoo Caller"],
+Dutch: ["Dyke Warden"],
+  Scot: ["Second Sight Mystic", "Presbyterian Firebrand"],
+  Korean: ["Mudang Shaman"],
+  "African Immigrant": ["Qurʼanic Scholar", "Exiled Monarch", "West African Griot", "Islamic Schoolmaster", "Exiled Monarch Pretender", "Marabout Mystic"],
+  Swiss: ["Anabaptist Homesteader"],
+  Iranian: ["Persian Peddler"],
+  Filipino: ["Manilaman", "Shrimp Dancer"],
+  "Anglo-American": ["Desert Prophet", "Temperance Zealot", "Puritan Witch-Hunter", "Orangeman Militant"],
+  "Anglo-American (Northerner)": ["Jayhawker", "Radical Abolitionist", "Union Leaguer", "Confederate Sympathizer", "Die Hard Industrialist"],
+  "Anglo-American (Southerner)": ["Knight of the Golden Circle", "Yeoman", "Bushwhacker", "Exiled Monarch Pretender", "Union Sympathizer"]
+    };
+
+    // Being
+    const ABERRATIONS = ["Skeleton","Ghost","Wendigo","Sasquatch","Ghoul","Headless Rider"];
+    const BEING_NONE = "Human";
+    const BEING_HARROWED = "Harrowed";
+
+    /*********************************
+     * STATE
+     *********************************/
+    // We store ethnicity as structured object (group/sub, with optional second group/sub for mixed)
+    const state = {
+      location: null,
+      gender: null,
+      ethnicity: { groupA: null, subA: null, groupB: null, subB: null }, // mixed uses B fields
+      archetype: null,
+      being: null,
+      locks: { location: false, gender: false, ethnicity: false, archetype: false, being: false }
+    };
+
+    /*********************************
+     * HELPERS
+     *********************************/
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => [...root.querySelectorAll(sel)];
+    const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+    const uniq = (arr) => [...new Set(arr)];
+
+    function openNav(){ const s=$("#navSidebar"); s.style.width="250px"; s.setAttribute("aria-hidden","false"); }
+    function closeNav(){ const s=$("#navSidebar"); s.style.width="0"; s.setAttribute("aria-hidden","true"); }
+
+    function openChooser(kind) {
+      const panel = $("#chooserPanel");
+      panel.style.width = "360px";
+      panel.setAttribute("aria-hidden","false");
+      $("#chooserTitle").textContent = ({
+        location:"Choose Location",
+        gender:"Choose Gender",
+        ethnicity:"Choose Ethnicity",
+        archetype:"Choose Archetype",
+        being:"Choose Being"
+      }[kind]||"Choose");
+      buildChooserBody(kind);
+    }
+    function closeChooser() {
+      const panel = $("#chooserPanel");
+      panel.style.width = "0";
+      panel.setAttribute("aria-hidden","true");
+      $("#chooserBody").innerHTML = "";
+    }
+
+    function displayEthnicity(eth) {
+      if (!eth.subA) return "—";
+      if (eth.groupB && eth.subB) return `${eth.subA} / ${eth.subB}`;
+      return eth.subA;
+    }
+
+    function setValue(field, val) {
+      if (field === "ethnicity") {
+        state.ethnicity = val; // val is {groupA,subA,groupB?,subB?}
+        $("#val-ethnicity").textContent = displayEthnicity(state.ethnicity);
+        // Revalidate archetype
+        if (state.archetype) {
+          const allowed = getExclusivesForCurrentEth().concat(GENERAL_ARCHETYPES);
+          if (!allowed.includes(state.archetype)) {
+            state.archetype = null;
+            $("#val-archetype").textContent = "—";
+          }
+        }
+        return;
+      }
+      state[field] = val;
+      $("#val-" + field).textContent = val ?? "—";
+    }
+
+    function toggleLock(field, btnEl) {
+      state.locks[field] = !state.locks[field];
+      btnEl.classList.toggle("locked", state.locks[field]);
+      btnEl.textContent = state.locks[field] ? "🔒 Locked" : "🔓 Lock";
+    }
+
+    /*********************************
+     * ETHNICITY: group-first → sub, + mixed-race (20%)
+     *********************************/
+    function pickEthnicityGroupSub() {
+      const isCommon = Math.random() < 0.70;
+      if (isCommon) {
+        const group = pick(Object.keys(commonEthnicities));
+        const sub = pick(commonEthnicities[group]);
+        return { groupA: group, subA: sub, groupB: null, subB: null };
+      } else {
+        const sub = pick(uncommonEthnicities);
+        // For uncommon set, we treat group as the same label for exclusives lookup convenience
+        return { groupA: sub, subA: sub, groupB: null, subB: null };
+      }
+    }
+
+    function maybeApplyMixedRace(origin, eth) {
+      if (Math.random() >= 0.20) return eth; // 20% chance only
+      const biasColonies = ["New Opportunity","Harmony","Goodwill"];
+      if (biasColonies.includes(origin) && Math.random() < 0.65) {
+        const subA = pick(commonEthnicities["Chinese"]);
+        const subB = pick(commonEthnicities["Native"]);
+        return { groupA: "Chinese", subA, groupB: "Native", subB };
+      }
+      // Otherwise pick any second ethnicity (group-first) distinct from first sub
+      let second = pickEthnicityGroupSub();
+      let tries = 0;
+      while (second.subA === eth.subA && tries < 5) { second = pickEthnicityGroupSub(); tries++; }
+      if (second.subA === eth.subA) return eth;
+      return { groupA: eth.groupA, subA: eth.subA, groupB: second.groupA, subB: second.subA };
+    }
+
+    /*********************************
+     * LOCATION with flips (Mormon/Native/Chinese) and Maze parity
+     *********************************/
+    function uniqueStatesList() {
+      const set = new Set([...siouxStates, ...westernerStates]);
+      return Array.from(set);
+    }
+
+    function pickOriginAndMaybeFlip(eth) {
+      // Build "state units" where Maze counts as one unit
+      const units = uniqueStatesList().concat("Maze");
+      const unit = pick(units);
+      let origin = unit;
+      if (unit === "Maze") {
+        // Dedup inside the Maze too (avoid any leftover duplicates)
+        origin = pick(uniq(mazerOrigins));
+      }
+
+      // Copy ethnicity (so we can return a modified version if unlocked)
+      let newEth = { ...eth };
+
+      if (!state.locks.ethnicity) {
+        // Utah → 50% flip to White Mormon
+        if (origin === "Utah" && Math.random() < 0.5) {
+          newEth = { groupA: "White Mormon", subA: "White Mormon", groupB: null, subB: null };
+        }
+
+        // Sioux states → ~60% Native bias (often Sioux)
+        if (siouxStates.includes(origin) && Math.random() < 0.6) {
+          const sub = Math.random() < 0.5 ? "Sioux" : pick(commonEthnicities["Native"]);
+          newEth = { groupA: "Native", subA: sub, groupB: null, subB: null };
+        }
+
+        // Shan Fan / Kwan's Province → 70% Chinese
+        if ((origin === "Shan Fan" || origin === "Kwan's Province") && Math.random() < 0.7) {
+          const sub = pick(commonEthnicities["Chinese"]);
+          newEth = { groupA: "Chinese", subA: sub, groupB: null, subB: null };
+        }
+      }
+
+      return { origin, ethnicity: newEth };
+    }
+
+    /*********************************
+     * ARCHETYPES
+     *********************************/
+    function getExclusivesForCurrentEth() {
+      const e = state.ethnicity;
+      if (!e || !e.subA) return [];
+      const keys = [];
+      // Use both group-level keys and exact sub-level keys
+      keys.push(e.groupA, e.subA);
+      if (e.groupB && e.subB) keys.push(e.groupB, e.subB);
+
+      // Collect + dedupe
+      const seen = new Set();
+      const out = [];
+      keys.forEach(k => {
+        const list = EXCLUSIVE_ARCHETYPES[k];
+        if (list && list.length) {
+          list.forEach(a => { if (!seen.has(a)) { seen.add(a); out.push(a); } });
+        }
+      });
+      return out;
+    }
+
+    function genArchetype() {
+      const ex = getExclusivesForCurrentEth();
+      if (ex.length && Math.random() < 0.30) return pick(ex); // 30% bias toward exclusives
+      const combined = ex.length ? GENERAL_ARCHETYPES.concat(ex) : GENERAL_ARCHETYPES;
+      return pick(combined);
+    }
+
+    /*********************************
+     * BEING
+     *********************************/
+    function genBeing() {
+      const roll = Math.random();
+      if (roll < 0.01) return "Aberration: " + pick(ABERRATIONS); // ~1%
+      if (roll < 0.06) return BEING_HARROWED;                      // ~5%
+      return BEING_NONE;
+    }
+
+	function applyEthnicityBiasFromLocation(location, eth) {
+  let newEth = { ...eth };
+
+  if (!location || state.locks.ethnicity) return newEth;
+
+  // Utah → 50% Mormon
+  if (location === "Utah" && Math.random() < 0.5) {
+    newEth = { groupA: "White Mormon", subA: "White Mormon", groupB: null, subB: null };
+  }
+
+  // Sioux states → 60% Native bias (often Sioux)
+  if (siouxStates.includes(location) && Math.random() < 0.6) {
+    const sub = Math.random() < 0.5 ? "Sioux" : pick(commonEthnicities["Native"]);
+    newEth = { groupA: "Native", subA: sub, groupB: null, subB: null };
+  }
+
+  // Shan Fan / Kwan's Province → 70% Chinese
+  if ((location === "Shan Fan" || location === "Kwan's Province") && Math.random() < 0.7) {
+    const sub = pick(commonEthnicities["Chinese"]);
+    newEth = { groupA: "Chinese", subA: sub, groupB: null, subB: null };
+  }
+
+  // Maze colonies → 65% bias toward Mixed Chinese/Native
+  const biasColonies = ["New Opportunity", "Harmony", "Goodwill"];
+  if (biasColonies.includes(location) && Math.random() < 0.65) {
+    const subA = pick(commonEthnicities["Chinese"]);
+    const subB = pick(commonEthnicities["Native"]);
+    newEth = { groupA: "Chinese", subA, groupB: "Native", subB };
+  }
+
+  return newEth;
+}
+
+
+    /*********************************
+     * GENERATION PIPELINE
+     *********************************/
+function generateAll() {
+  // Ethnicity
+  if (!state.locks.ethnicity) {
+    setValue("ethnicity", pickEthnicityGroupSub());
+  }
+
+  // Location
+  if (!state.locks.location) {
+    const res = pickOriginAndMaybeFlip(state.ethnicity);
+    setValue("location", res.origin);
+    if (!state.locks.ethnicity) setValue("ethnicity", res.ethnicity);
+  }
+
+  // Always apply ethnicity bias rules, even when location is locked
+  if (!state.locks.ethnicity) {
+    const biased = applyEthnicityBiasFromLocation(state.location, state.ethnicity);
+    setValue("ethnicity", biased);
+  }
+
+  // Mixed race (after bias pass)
+  if (!state.locks.ethnicity) {
+    const mixed = maybeApplyMixedRace(state.location, state.ethnicity);
+    setValue("ethnicity", mixed);
+  }
+
+  // Gender
+  if (!state.locks.gender) setValue("gender", Math.random() < 0.5 ? "Male" : "Female");
+  // Archetype
+  if (!state.locks.archetype) setValue("archetype", genArchetype());
+  // Being
+  if (!state.locks.being) setValue("being", genBeing());
+}
+
+
+    function resetAll() {
+      setValue("location", null);
+      setValue("gender", null);
+      setValue("ethnicity", { groupA:null, subA:null, groupB:null, subB:null });
+      setValue("archetype", null);
+      setValue("being", null);
+      Object.keys(state.locks).forEach(k => state.locks[k] = false);
+      $$(".lock-btn").forEach(btn => { btn.classList.remove("locked"); btn.textContent = "🔓 Lock"; });
+    }
+
+function copySummary() {
+  const parts = [
+    `Location: ${state.location || "—"}`,
+    `Archetype: ${state.archetype || "—"}`,
+    `Gender: ${state.gender || "—"}`,
+    `Ethnicity: ${displayEthnicity(state.ethnicity)}`
+  ];
+
+  if (state.being && state.being !== BEING_NONE) {
+    parts.push(`Being: ${state.being}`);
+  }
+
+  const text = parts.join(" | ");
+  navigator.clipboard.writeText(text).then(() => alert("Character concept copied!"));
+}
+
+    /*********************************
+     * RANDOMIZERS (per-field)
+     *********************************/
+    function randomizeField(field) {
+      switch (field) {
+        case "location": {
+          const res = pickOriginAndMaybeFlip(state.ethnicity);
+          setValue("location", res.origin);
+          if (!state.locks.ethnicity) setValue("ethnicity", res.ethnicity);
+          // if archetype locked, leave; else revalidate (setValue handles invalid)
+          if (!state.locks.archetype && state.archetype == null) setValue("archetype", genArchetype());
+          break;
+        }
+        case "gender": {
+          setValue("gender", Math.random() < 0.5 ? "Male" : "Female");
+          break;
+        }
+        case "ethnicity": {
+          let eth = pickEthnicityGroupSub();
+          // Apply mixed race given current location context
+          eth = maybeApplyMixedRace(state.location, eth);
+          setValue("ethnicity", eth);
+          if (!state.locks.archetype) setValue("archetype", genArchetype());
+          break;
+        }
+        case "archetype": {
+          setValue("archetype", genArchetype());
+          break;
+        }
+        case "being": {
+          setValue("being", genBeing());
+          break;
+        }
+      }
+    }
+
+    /*********************************
+     * CHOOSER BUILDERS
+     *********************************/
+    function buildChooserBody(kind) {
+      const body = $("#chooserBody");
+      body.innerHTML = "";
+
+      if (kind === "location") {
+        // Show states and Maze section
+        const sec1t = document.createElement("div");
+        sec1t.className = "chooser-section-title";
+        sec1t.textContent = "States & Territories";
+        body.appendChild(sec1t);
+
+        const ul1 = document.createElement("ul");
+        ul1.className = "chooser-list";
+        uniqueStatesList().forEach(loc => {
+          const li = document.createElement("li");
+          li.className = "chooser-item";
+          li.textContent = loc;
+          li.onclick = () => { setValue("location", loc); closeChooser(); };
+          ul1.appendChild(li);
+        });
+        body.appendChild(ul1);
+
+        const sec2t = document.createElement("div");
+        sec2t.className = "chooser-section-title";
+        sec2t.textContent = "The Maze";
+        body.appendChild(sec2t);
+
+        const ul2 = document.createElement("ul");
+        ul2.className = "chooser-list";
+        uniq(mazerOrigins).forEach(loc => {
+          const li = document.createElement("li");
+          li.className = "chooser-item";
+          li.textContent = loc;
+          li.onclick = () => { setValue("location", loc); closeChooser(); };
+          ul2.appendChild(li);
+        });
+        body.appendChild(ul2);
+        return;
+      }
+
+      if (kind === "gender") {
+        const genders = ["Male","Female","Nonbinary"];
+        const ul = document.createElement("ul");
+        ul.className = "chooser-list";
+        genders.forEach(g => {
+          const li = document.createElement("li");
+          li.className = "chooser-item";
+          li.textContent = g;
+          li.onclick = () => { setValue("gender", g); closeChooser(); };
+          ul.appendChild(li);
+        });
+        body.appendChild(ul);
+        return;
+      }
+
+      if (kind === "ethnicity") {
+        // Group headings with sublists; encode group in data attribute so selection sets both
+        Object.entries(commonEthnicities).forEach(([group, subs]) => {
+          const t = document.createElement("div");
+          t.className = "chooser-section-title";
+          t.textContent = group;
+          body.appendChild(t);
+
+          const ul = document.createElement("ul");
+          ul.className = "chooser-list";
+          subs.forEach(sub => {
+            const li = document.createElement("li");
+            li.className = "chooser-item";
+            li.textContent = sub;
+            li.dataset.group = group;
+            li.onclick = () => {
+              setValue("ethnicity", { groupA: group, subA: sub, groupB: null, subB: null });
+              closeChooser();
+            };
+            ul.appendChild(li);
+          });
+          body.appendChild(ul);
+        });
+
+        const rt = document.createElement("div");
+        rt.className = "chooser-section-title";
+        rt.textContent = "Other";
+        body.appendChild(rt);
+
+        const rul = document.createElement("ul");
+        rul.className = "chooser-list";
+        uncommonEthnicities.forEach(sub => {
+          const li = document.createElement("li");
+          li.className = "chooser-item";
+          li.textContent = sub;
+          li.onclick = () => {
+            setValue("ethnicity", { groupA: sub, subA: sub, groupB: null, subB: null });
+            closeChooser();
+          };
+          rul.appendChild(li);
+        });
+        body.appendChild(rul);
+        return;
+      }
+
+      if (kind === "archetype") {
+        const exForEth = getExclusivesForCurrentEth();
+
+        // 1) Ethnicity-exclusive (current)
+        const s1 = document.createElement("div");
+        const s1t = document.createElement("div");
+        s1t.className = "chooser-section-title";
+        const ethLabel = displayEthnicity(state.ethnicity);
+        s1t.textContent = ethLabel && ethLabel !== "—" ? `${ethLabel} Exclusive` : "Exclusive (choose ethnicity)";
+        s1.appendChild(s1t);
+        const ul1 = document.createElement("ul");
+        ul1.className = "chooser-list";
+        (exForEth.length ? exForEth : []).forEach(a => {
+          const li = document.createElement("li");
+          li.className = "chooser-item";
+          li.textContent = a;
+          li.onclick = () => { setValue("archetype", a); closeChooser(); };
+          ul1.appendChild(li);
+        });
+        if (exForEth.length === 0) {
+          const li = document.createElement("li");
+          li.className = "chooser-item";
+          li.style.opacity = "0.65";
+          li.textContent = "(No exclusives for current ethnicity)";
+          ul1.appendChild(li);
+        }
+        s1.appendChild(ul1);
+        body.appendChild(s1);
+
+        // 2) General
+        const s2t = document.createElement("div");
+        s2t.className = "chooser-section-title";
+        s2t.textContent = "General Archetypes";
+        body.appendChild(s2t);
+
+        const ul2 = document.createElement("ul");
+        ul2.className = "chooser-list";
+        GENERAL_ARCHETYPES.forEach(a => {
+          const li = document.createElement("li");
+          li.className = "chooser-item";
+          li.textContent = a;
+          li.onclick = () => { setValue("archetype", a); closeChooser(); };
+          ul2.appendChild(li);
+        });
+        body.appendChild(ul2);
+
+        // 3) Other exclusives
+        const allOther = [];
+        Object.entries(EXCLUSIVE_ARCHETYPES).forEach(([k, list]) => {
+          // if k not in current eth keys (groupA, subA, groupB, subB)
+          const keys = [state.ethnicity.groupA, state.ethnicity.subA, state.ethnicity.groupB, state.ethnicity.subB]
+            .filter(Boolean);
+          if (!keys.includes(k)) allOther.push(...list);
+        });
+
+        const s3t = document.createElement("div");
+        s3t.className = "chooser-section-title";
+        s3t.textContent = "Other Ethnicity-Exclusive";
+        body.appendChild(s3t);
+
+        const ul3 = document.createElement("ul");
+        ul3.className = "chooser-list";
+        uniq(allOther).forEach(a => {
+          const li = document.createElement("li");
+          li.className = "chooser-item";
+          li.textContent = a;
+          li.onclick = () => { setValue("archetype", a); closeChooser(); };
+          ul3.appendChild(li);
+        });
+        body.appendChild(ul3);
+        return;
+      }
+
+      if (kind === "being") {
+        const ul = document.createElement("ul");
+        ul.className = "chooser-list";
+        [BEING_NONE, BEING_HARROWED, ...ABERRATIONS.map(a => "Aberration: " + a)].forEach(b => {
+          const li = document.createElement("li");
+          li.className = "chooser-item";
+          li.textContent = b;
+          li.onclick = () => { setValue("being", b); closeChooser(); };
+          ul.appendChild(li);
+        });
+        body.appendChild(ul);
+        return;
+      }
+    }
+
+    /*********************************
+     * WIRING
+     *********************************/
+    // Open pickers (right drawer)
+    $$(".picker-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        openChooser(btn.getAttribute("data-open"));
+      });
+    });
+
+    // Lock toggles
+    $$(".lock-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const field = btn.getAttribute("data-lock");
+        toggleLock(field, btn);
+      });
+    });
+
+    // Randomize per section
+    $$(".mini-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const field = btn.getAttribute("data-randomize");
+        randomizeField(field);
+      });
+    });
+
+    // Toolbar
+    $("#btnGenerate").addEventListener("click", generateAll);
+    $("#btnReset").addEventListener("click", resetAll);
+    $("#btnCopy").addEventListener("click", copySummary);
+
+    // Close chooser on ESC
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeChooser();
+    });
+
+    // Close chooser on outside click (but not when clicking open controls)
+    document.addEventListener("click", (e) => {
+      const panel = $("#chooserPanel");
+      if (panel.getAttribute("aria-hidden") === "true") return;
+      const inside = panel.contains(e.target) || e.target.matches(".picker-btn");
+      const navSide = $("#navSidebar").contains(e.target) || e.target.matches(".openbtn");
+      if (!inside && !navSide) closeChooser();
+    });
+
+    // Expose nav functions globally for left menu buttons
+    window.openNav = openNav;
+    window.closeNav = closeNav;
+    window.closeChooser = closeChooser;
+
+    // Init
+    generateAll();
+  </script>
+</body>
+</html>
