@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deadlands RPG</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: Arial, sans-serif;
+      color: white;
+      background: black url('background.png') no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    .overlay {
+      background-color: rgba(0, 0, 0, 0.6);
+      height: 100%;
+      width: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+
+    .logo {
+      display: block;
+      margin: 0px auto;
+      max-width: 800px;
+    }
+
+    .content {
+      max-width: 900px;
+      margin: auto;
+      padding: 0 50px;
+    }
+
+    @media (max-width: 768px) {
+      .content {
+        padding: 0 15px;
+      }
+    }
+
+    /* Sidebar */
+    .sidebar {
+      height: 100%;
+      width: 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background-color: #111;
+      overflow-x: hidden;
+      transition: 0.3s;
+      padding-top: 60px;
+    }
+
+    .sidebar a {
+      display: block;
+      padding: 10px 20px;
+      text-decoration: none;
+      color: white;
+    }
+
+    .sidebar a:hover {
+      background-color: #333;
+    }
+
+    .sidebar .closebtn {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 25px;
+      cursor: pointer;
+    }
+
+    .openbtn {
+      font-size: 20px;
+      cursor: pointer;
+      background: #111;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+    }
+
+    /* Dropdowns */
+    .dropdown {
+      border: 1px solid white;
+      margin: 20px 0;
+    }
+
+    .dropdown-header {
+      background: #222;
+      padding: 10px;
+      cursor: pointer;
+    }
+
+    .dropdown-content {
+      display: none;
+      padding: 10px;
+      background: #333;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+    }
+
+    .dropdown-content .description {
+      margin: 10px 0;
+    }
+
+    .version-btns {
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .version-btns button {
+      background: #111;
+      color: white;
+      border: 1px solid white;
+      padding: 5px 10px;
+      cursor: pointer;
+      margin: 3px;
+    }
+
+    .copy-btn {
+      background: #111;
+      color: white;
+      border: 1px solid white;
+      padding: 5px 10px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    /* Fix long <pre> content */
+    .content-text {
+      white-space: pre-wrap;   /* preserve formatting but allow wrapping */
+      word-wrap: break-word;
+      overflow-x: auto;        /* allow horizontal scroll if needed */
+      max-width: 100%;
+	  font-size: 10px
+    }
+	
+			  .deadlands-btn {
+    display: block;
+    margin: 10px;
+    padding: 10px 15px;
+    background-color: #824c29; /* Discord purple */
+    color: white;
+    text-align: center;
+    border-radius: 8px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+
+  .deadlands-btn:hover {
+    background-color: #5f3316; /* Slightly darker hover */
+  }
+	  .discord-btn {
+    display: block;
+    margin: 10px;
+    padding: 10px 15px;
+    background-color: #5865F2; /* Discord purple */
+    color: white;
+    text-align: center;
+    border-radius: 8px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+
+  .discord-btn:hover {
+    background-color: #4752c4; /* Slightly darker hover */
+  }
+  
+  
+    .forgotten-realms-btn {
+    display: block;
+    margin: 10px;
+    padding: 10px 15px;
+    background-color: #8B0000; /* Dark red */
+    color: white;
+    text-align: center;
+    border-radius: 8px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+
+  .forgotten-realms-btn:hover {
+    background-color: #5c0000; /* Darker red on hover */
+  }
+	
+	
+	     .Sanguis-btn {
+    display: block;
+    margin: 10px;
+    padding: 10px 15px;
+    background-color: black; /* Dark red */
+    color: white;
+    text-align: center;
+    border-radius: 8px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+
+  .Sanguis-btn:hover {
+    background-color: #5c0000; /* Darker red on hover */
+  }
+
+.btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+}
+.btn:hover {
+  background-color: #0056b3;
+}
+
+  </style>
+</head>
+<body>
+  <div class="overlay"></div>
+
+  <button class="openbtn" onclick="openSidebar()">☰ Menu</button>
+
+<div id="mySidebar" class="sidebar">
+  <span class="closebtn" onclick="closeSidebar()">×</span>
+  <a href="index.html">Home</a>
+  <a href="guide.html">Deadlands: Custodial Edition Intro</a>
+  <a href="Generator.html">Character Idea Generator</a>
+  <a href="builder.html">Character/Stat Builder</a>
+  <a href="shop.html">Inventory Helper/Shop</a>
+  <a href="extension.html">Chrome Extension</a>
+
+  <br><br><br>
+  <a href="https://discord.gg/yMx6j79yez" target="_blank" class="discord-btn">Discord</a>
+    <a href="https://janitorai.com/characters/6af72b1b-d44f-4966-845f-67a2ff20adfe_character-%E2%98%A0%EF%B8%8E%EF%B8%8E-deadlands-rpg-%F0%9F%82%A1" target="_blank" class="deadlands-btn">Deadlands RPG on Janitor AI</a>
+
+<p> More Modules: </p>
+    <a href="https://bimaadizi.github.io/Forgotten-Realms-RPG/" target="_blank" class="forgotten-realms-btn">DnD/RPG Prompts</a>
+
+    <a href="https://bimaadizi.github.io/Sanguis/" target="_blank" class="Sanguis-btn">Vampire Prompts</a>
+
+</div>
+  <img src="logo.png" alt="Logo" class="logo">
+
+  <div class="content">
+<p>In order to make things easier for the user to manage dice rolls, card draws, and feel overall more snappy I've created a Chrome Extension that will parse text and display it, allowing for snappy dice rolls and deck draws allowing you to make draws, copy it, and relay it to the bot </p>
+
+<p> It tracks variables across rolls so that features link together (hex roll effects hex draw hand size) and features a copy button to relay them to the bot </p>
+
+<p> 
+<a href="https://github.com/Bimaadizi/deadlands-extension/tree/main" class="btn">Download it here!</a>
+
+
+<p> It may be updated in the future with more features (music, character sheet, inventory) but for now it's just a simple extension to make it more convenient to use. </p>
+
+<p> You can also find more features (such as constantly updating maps, journals, and otherwise that might be useful to you here, I did not bundle them with this extension because I was having issues with integrating them and couldn't figure it out.</p>
+<a href="https://bimaadizi.github.io/Forgotten-Realms-RPG/">Forgotten Realms RPG</a>
+
+  <script>
+    function openSidebar() {
+      document.getElementById("mySidebar").style.width = "250px";
+    }
+
+    function closeSidebar() {
+      document.getElementById("mySidebar").style.width = "0";
+    }
+
+    function toggleDropdown(header) {
+      const content = header.nextElementSibling;
+      content.style.display = content.style.display === "block" ? "none" : "block";
+    }
+
+    function copyContent(btn) {
+      const text = btn.parentElement.querySelector(".content-text").innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Copied to clipboard!");
+      });
+    }
+
+function switchVersion(btn, versionIndex) {
+  const parent = btn.closest(".dropdown-content");
+  const versions = parent.querySelectorAll(".version");
+
+  versions.forEach((v, i) => {
+    if (i === versionIndex) {
+      v.style.display = "block";
+      v.classList.add("active");
+    } else {
+      v.style.display = "none";
+      v.classList.remove("active");
+    }
+  });
+}
+
+  </script>
+</body>
+</html>
