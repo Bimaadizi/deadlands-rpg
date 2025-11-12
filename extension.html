@@ -262,7 +262,82 @@
 
 <p> You can also find more features (such as constantly updating maps, journals, and otherwise that might be useful to you here, I did not bundle them with this extension because I was having issues with integrating them and couldn't figure it out.</p>
 <a href="https://bimaadizi.github.io/Forgotten-Realms-RPG/">Forgotten Realms RPG</a>
+<h2> How to use </h2>
+<p> For Dice & Card mechanics, make sure you utilize the Manual versions of all modules in the Home section of the website. You can then click the button in the top left, it will parse the message for any uses of dice rolls or hexes, ensure that it follows the proper format (Read "Deadlands: Custodial Edition Intro" on the sidebar for more details) <p>
+<p> For the inventory module, use the below system prompt in place of the default inventory module, and ensure that you update your chat memory constantly. You can paste your chat memory template, companion template, and any other details you keep in your Chat Memory section into the 'Copy with base' section to make it easier to update. This system prompt will display an image (to the best of it's ability) based on what the bot adds and removes. You can right click an image to change how it displays. </p>
+<p> If you have any questions or issues, feel free to reach out to me on discord! </p>
+    <div class="dropdown">
+      <div class="dropdown-header" onclick="toggleDropdown(this)">🟧 Inventory (Extension)</div>
+      <div class="dropdown-content">
+        <div class="version-btns">
+          <button onclick="switchVersion(this, 0)">Inventory</button>
+        </div>
+        <div class="description">This is the system prompt for adding inventory mechanics to the bot that are integrated with the extension. If you are using this on a bot that isn't deadlands, you can edit appropriately (i.e changing the money to gold, or removing the guns section. NOTE: You can't change guns to "Arrows" and have it work)</div>
+        <pre class="content-text">## Money
+- Store money above the inventory module
+- Do NOT store money inside of the inventory (except raw-money like gold, silver, etc.)
+- Store ALL money in here. This section should reflect all money the user has
+- Appropriately add and remove money throughout the story. 
+Store like this:
+---
+Money
+$84.75
+---
 
+## Inventory
+Purpose: Track items in the user's inventory
+- List changes in the user's inventory, including additions and removals
+- List the names of items added/removed separated by commas in this section
+- Always track guns ammo in a gun in each message and the content of each
+- Incorporate inventory into the plot and story.
+- Ensure this is always included at end of message, never exclude it.
+Example:
+---
+Inventory Matrix:
+Added:
+Removed:
+Guns:
+Name of Gun: 6/6
+Inventory Matrix End
+---
+- You MUST include 'Inventory Matrix End' exactly written like that to signify the end of the Inventory Matrix.
+
+- Match the names of the item in the inventory exactly to how it looks in chat memory
+Example of chat memory contents:
+<inventory>
+Inventory:
+Weapons:
+Colt .44` *(3d6, 5/6 rounds loaded. Ammo type: .44)
+12-Guage Shotgun` *(1d6, 5d6 close range, 2/2 rounds loaded, Ammo Type: 12 gauge shells)
+Bowie Knife (Damage: 1d6, melee)
+Ammo: 
+.44
+12 gauge shells
+Items:
+Canteen` *(Full, 3 uses)
+Whiskey Flask` *(Half-full, 2/3 uses)*
+Bedroll
+Rations (1/day, 3)
+</inventory>
+
+### Validation Checks
+- Check if the user explicitly picks up, drops, or uses an item, do not assume until confident
+- Check at all money deducted corresponds to the value of a purchase
+- You are encouraged to show your work/reasoning in *(parenthesis)* for math
+- Check that the value utilized in math actually corresponds to purchased items.
+</pre>
+        <button class="copy-btn" onclick="copyContent(this)">Copy</button>
+      </div>
+    </div>
+<br>
+<p> <b> Note: Make sure the bot's message follows this format: </b></p>
+<p> Added: Item, Item, Item</p>
+<p> <b>And not:</b></p>
+<p> Added: </p>
+<p> - Item </p>
+<p> - Item </p>
+<p> - Item </p>
+<br><br><br><br>
   <script>
     function openSidebar() {
       document.getElementById("mySidebar").style.width = "250px";
